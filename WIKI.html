@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FF14 灰機 Wiki 快速查詢</title>
+    <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; color: #333; max-width: 800px; margin: 50px auto; padding: 20px; }
+        .search-container { display: flex; gap: 10px; margin-bottom: 20px; }
+        input[type="text"] { flex-grow: 1; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 10px 20px; font-size: 16px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s; }
+        button:hover { background-color: #45a049; }
+        #result { background-color: white; padding: 20px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); min-height: 100px; line-height: 1.6; }
+        .loading { color: #666; font-style: italic; }
+        .error { color: #d32f2f; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1>🗡️ FF14 灰機 Wiki 快速查詢</h1>
+    
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="請輸入關鍵字（例如：拂曉血盟、曼城茶座...）" value="拂曉血盟">
+        <button id="searchBtn">搜尋</button>
+    </div>
+
+    <div id="result">
+        在這裡顯示查詢結果...
+    </div>
+
+    <script>
+        window.onload = function() {
+            try {
+                const s2tConverter = OpenCC.Converter({ from: 'cn', to: 'tw' }); 
+                const t2sConverter = OpenCC.Converter({ from: 'tw', to: 'cn' }); 
+
+                document.getElementById('searchBtn').addEventListener('click', () => {
+                    const keyword = document.getElementById('searchInput').value.trim();
+                    if (keyword) fetchWikiData(keyword, s2tConverter, t2sConverter);
+                });
+
+                document.getElementById('searchInput').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') document.getElementById('searchBtn').click();
+                });
+            } catch (error) {
+                document.getElementById('result').innerHTML = `<span class="error">OpenCC 工具載入失敗，請確認網路連線。</span>`;
+            }
+        };
+
+        async function fetchWikiData(keyword, s2tConverter, t2sConverter) {
+            const resultDiv = document.getElementById('result');
+            const searchKeyword = t2sConverter(keyword);
+            
+            resultDiv.innerHTML = `<span class="loading">正在前往以太之光讀取資料...<br>(實際送出搜尋條目：${searchKeyword})</span>`;
+
+            // 直接呼叫官方 API，加上 origin=* 準備在 Vercel 上使用
+            const baseUrl = "https://ff14.huijiwiki.com/api.php";
+            const params = new URLSearchParams({
+                action: "query",
+                format: "json",
+                prop: "extracts",
+                exintro: "",       
+                explaintext: "",   
+                titles: searchKeyword,
+                origin: "*"        
+            });
+
+            try {
+                const response = await fetch(`${baseUrl}?${params.toString()}`);
+                
+                if (!response.ok) throw new Error(`伺服器回應錯誤狀態：${response.status}`);
+
+                const data = await response.json();
+                const pages = data.query.pages;
+                const pageId = Object.keys(pages)[0];
+
+                if (pageId === "-1") {
+                    resultDiv.innerHTML = `<span class="error">找不到關於「${keyword}」的資訊。Wiki 上可能沒有這個條目。</span>`;
+                    return;
+                }
+
+                const simplifiedContent = pages[pageId].extract;
+
+                if (!simplifiedContent) {
+                    resultDiv.innerHTML = `<span class="error">找到了頁面，但該條目沒有文字簡介。</span>`;
+                    return;
+                }
+
+                const traditionalContent = s2tConverter(simplifiedContent);
+                resultDiv.innerHTML = traditionalContent.replace(/\n/g, '<br><br>');
+
+            } catch (error) {
+                console.error("抓取失敗:", error);
+                resultDiv.innerHTML = `<span class="error">連線發生錯誤：${error.message}</span>`;
+            }
+        }
+    </script>
+
+</body>
+</html>
