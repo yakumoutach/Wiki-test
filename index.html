@@ -9,11 +9,11 @@
         /* === 🌐 基礎設定 === */
         body { font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif; background-color: #f8fafc; color: #1e293b; max-width: 1200px; margin: 30px auto; padding: 20px; }
         h1 { text-align: center; color: #0f172a; margin-bottom: 20px; font-weight: 900; letter-spacing: 1px; }
-        .version-tag { font-size: 14px; color: #b45309; font-weight: bold; vertical-align: middle; background: #fef3c7; padding: 4px 10px; border-radius: 8px; border: 1px solid #fcd34d; }
+        .version-tag { font-size: 14px; color: #b45309; font-weight: bold; vertical-align: middle; background: #fef3c7; padding: 4px 10px; border-radius: 8px; border: 1px solid #fbd38d; }
         
         /* === 🔍 搜尋列 === */
         .find-panel { display: flex; gap: 10px; margin-bottom: 30px; justify-content: center; }
-        #findInput { width: 100%; max-width: 500px; padding: 14px 20px; font-size: 16px; border: 2px solid #cbd5e1; border-radius: 12px; outline: none; transition: 0.3s; }
+        #findInput { width: 100%; max-width: 500px; padding: 14px 20px; font-size: 16px; border: 2px solid #cbd5e1; border-radius: 12px; outline: none; transition: 0.3s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
         #findInput:focus { border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79,70,229,0.2); }
         #findBtn { padding: 14px 30px; font-size: 16px; background: linear-gradient(135deg, #4f46e5, #3730a3); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         #findBtn:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(79,70,229,0.3); }
@@ -84,7 +84,7 @@
 </head>
 <body>
 
-    <h1>🗡️ FF14 角色資訊面板 <span class="version-tag">(v19 精準萃取版)</span></h1>
+    <h1>🗡️ FF14 角色資訊面板 <span class="version-tag">(v20 精準手術刀版)</span></h1>
     
     <div class="find-panel">
         <input type="text" id="findInput" placeholder="請輸入關鍵字（例如：塔塔露...）" value="塔塔露">
@@ -101,11 +101,10 @@
                     <img id="dash-main-img" src="" alt="等待載入...">
                 </div>
                 <div class="bp-btn-box">
-                    <div class="bp-btn-title">對應人物版本 (附圖描述)</div>
+                    <div class="bp-btn-title">對應人物版本</div>
                     <div id="dash-img-controls" style="display:flex; flex-wrap:wrap; gap:8px; justify-content:center; width:100%;"></div>
                 </div>
             </div>
-            
             <div class="bp-right-col">
                 <div class="bp-info-title">角色信息 / 相關信息 逐列呈現</div>
                 <div id="dash-right"></div>
@@ -139,7 +138,7 @@
             function triggerSearch() {
                 const keyword = input.value.trim();
                 if (!keyword) return;
-                statusMsg.innerHTML = `<div class="sys-msg" style="color:#4f46e5;">🟢 啟動防禦破解，正在搜尋...</div>`;
+                statusMsg.innerHTML = `<div class="sys-msg" style="color:#4f46e5;">🟢 啟動四重突破協議，正在搜尋...</div>`;
                 bpContainer.style.display = 'none';
                 executeDashboardBuild(keyword);
             }
@@ -168,7 +167,7 @@
 
             function getHighResUrl(img) {
                 let src = img.getAttribute('data-src') || img.getAttribute('data-lazy-src') || img.getAttribute('src');
-                if (!src || src.includes('16px') || src.includes('20px')) return null; 
+                if (!src || src.includes('16px') || src.includes('20px') || src.includes('32px') || src.includes('icon')) return null; 
                 if (src.startsWith('//')) src = 'https:' + src;
                 else if (src.startsWith('/')) src = 'https://ff14.huijiwiki.com' + src;
                 if (src.includes('/thumb/')) {
@@ -195,11 +194,11 @@
                         return;
                     }
 
-                    statusMsg.innerHTML = `<div class="sys-msg" style="color:#4f46e5;">🔨 突破成功！正在進行奈米級萃取與藍圖對齊...</div>`;
+                    statusMsg.innerHTML = `<div class="sys-msg" style="color:#4f46e5;">🔨 突破成功！正在進行精準萃取...</div>`;
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(data.parse.text['*'], 'text/html');
 
-                    // 1. 物理拔除超連結
+                    // 拔除超連結
                     doc.querySelectorAll('a').forEach(a => {
                         const img = a.querySelector('img');
                         if (img) { a.parentNode.insertBefore(img, a); a.remove(); } 
@@ -210,92 +209,56 @@
                         }
                     });
 
-                    // 2. 清除編輯按鈕
+                    // 清除垃圾
                     doc.querySelectorAll('.mw-editsection, .noprint, style, script, .toc').forEach(e => e.remove());
 
                     // ==========================================
-                    // ⭐️ 核心魔法：奈米級精準萃取器 ⭐️
+                    // ⭐️ 核心魔法：精準外科手術 ⭐️
+                    // 只針對「頁籤/畫廊」提取圖片，絕對不碰文章段落！
                     // ==========================================
                     characterImages = [];
                     const addedUrls = new Set(); 
                     
-                    // A: 針對標準的頁籤導航列 (徹底解決黑點點與文字掉落)
-                    doc.querySelectorAll('ul.nav-tabs, ul.tabbernav, ul.huiji-tabs-nav, ul.pi-image-collection-tabs').forEach(ul => {
-                        let labels = [];
-                        
-                        // 抓取按鈕名稱，並強制【字數限制 < 15】，絕不把簡介當成按鈕！
-                        ul.querySelectorAll('li, a').forEach(el => {
-                            let txt = el.textContent.trim();
-                            if (txt && txt.length < 15 && !labels.includes(txt)) {
-                                labels.push(txt);
+                    // 只針對真正用來切換圖片的容器
+                    doc.querySelectorAll('.huiji-tabs, .tabber, .pi-image-collection').forEach(container => {
+                        let tabNames = [];
+                        // 抓取按鈕名稱，嚴格限制長度小於 12 個字，拒絕故事段落！
+                        container.querySelectorAll('li, .tabbernav a, .pi-image-collection-tab').forEach(el => {
+                            let txt = el.textContent.replace(/[\n\t\r]/g, '').trim();
+                            if (txt && txt.length <= 12) tabNames.push(txt);
+                        });
+
+                        let panes = container.querySelectorAll('.tab-pane, .tabbertab, .pi-image-collection-tab-content');
+                        if (panes.length === 0) panes = [container];
+
+                        panes.forEach((pane, idx) => {
+                            let img = pane.querySelector('img');
+                            if (img) {
+                                let src = getHighResUrl(img);
+                                if (src && !addedUrls.has(src)) {
+                                    let label = tabNames[idx] || pane.getAttribute('title') || img.getAttribute('alt') || '外觀預覽';
+                                    if (label.length > 12) label = '外觀預覽'; // 二重防護
+                                    addedUrls.add(src);
+                                    characterImages.push({ url: src, label: label });
+                                }
                             }
                         });
-                        
-                        // 尋找鄰近的內容區塊 (圖片所在地)
-                        let contentContainer = ul.nextElementSibling;
-                        if (!contentContainer || !contentContainer.classList.contains('tab-content')) {
-                            contentContainer = ul.parentElement.querySelector('.tab-content, .tabber, .pi-image-collection-tab-content');
-                        }
-                        
-                        if (contentContainer) {
-                            let panes = contentContainer.querySelectorAll('.tab-pane, .tabbertab, .pi-image-collection-tab-content');
-                            panes.forEach((pane, idx) => {
-                                let img = pane.querySelector('img');
-                                if (img) {
-                                    let src = getHighResUrl(img);
-                                    if (src && !addedUrls.has(src)) {
-                                        let label = labels[idx] || pane.getAttribute('title') || '外觀預覽';
-                                        if (label.length > 15) label = '外觀預覽'; // 二重防護
-                                        addedUrls.add(src);
-                                        characterImages.push({url: src, label: label});
-                                    }
-                                    img.remove(); // 圖片抽走後銷毀
-                                }
-                                // ⚠️ 關鍵：讓原本藏在頁籤裡的「其他純文字(生平敘述等)」顯示出來！
-                                pane.style.display = 'block';
-                                pane.style.opacity = '1';
-                                pane.style.visibility = 'visible';
-                                pane.style.height = 'auto';
-                            });
-                        }
-                        // 💣 毀屍滅跡：把這個產生黑點點跟名稱的導航列，直接從網頁中炸毀！
-                        ul.remove(); 
+                        // 抽完圖片與按鈕後，將這個容器完全刪除，防止右側和下方跑出版面
+                        container.remove(); 
                     });
 
-                    // B: 如果編輯者沒寫 class，用地毯式搜查！(解決極端特例)
-                    doc.querySelectorAll('ul').forEach(ul => {
-                        let text = ul.textContent.replace(/\s/g, '');
-                        if (text.includes('重生之境') && text.includes('晓月')) {
-                            ul.querySelectorAll('li').forEach((li, idx) => {
-                                let txt = li.textContent.trim();
-                                if (txt.length < 15 && characterImages[idx] && characterImages[idx].label === '外觀預覽') {
-                                    characterImages[idx].label = txt;
-                                }
-                            });
-                            ul.remove(); // 炸毀黑點點清單！
-                        }
-                    });
-
-                    // C: 撈取網頁上殘留的人物大圖
-                    doc.querySelectorAll('.mw-parser-output img').forEach(img => {
-                        let src = getHighResUrl(img);
-                        if (src && !addedUrls.has(src)) {
-                            let label = img.getAttribute('alt') || '外觀預覽';
-                            if (label.length > 15) label = '外觀預覽';
-                            addedUrls.add(src);
-                            characterImages.push({url: src, label: label});
-                        }
-                        img.remove();
-                    });
+                    // 刪除散落的導航列，避免跑出黑點點
+                    doc.querySelectorAll('.nav-tabs, .tabbernav, .pi-image-collection-tabs').forEach(nav => nav.remove());
 
                     // ==========================================
-                    // ⭐️ 資訊框解析：右側資料區
+                    // 右側資訊框解析
                     // ==========================================
                     let rightPanelHtml = '';
-                    let infobox = doc.querySelector('.infobox, .portable-infobox, table.acbox, table.character-box, .huiji-infobox');
+                    let infobox = doc.querySelector('.infobox, .portable-infobox, .huiji-infobox, table.character-box, table.acbox');
+                    
+                    // 備用尋找法：尋找第一個靠右的表格
                     if (!infobox) {
-                        let tables = doc.querySelectorAll('table');
-                        for (let t of tables) {
+                        for (let t of doc.querySelectorAll('table')) {
                             if (t.style.float === 'right' || t.getAttribute('align') === 'right' || t.classList.contains('wikitable')) {
                                 infobox = t; break;
                             }
@@ -303,6 +266,18 @@
                     }
 
                     if (infobox) {
+                        // 撿漏圖片 (如果資訊框裡還有主圖)
+                        let mainImg = infobox.querySelector('img');
+                        if (mainImg) {
+                            let src = getHighResUrl(mainImg);
+                            if (src && !addedUrls.has(src)) {
+                                characterImages.unshift({ url: src, label: '預設' }); // 塞到第一個
+                                addedUrls.add(src);
+                            }
+                            mainImg.remove();
+                        }
+
+                        // 逐列提取資料
                         infobox.querySelectorAll('.pi-header, tr, li').forEach(node => {
                             let rawText = node.textContent.replace(/[\s\xA0\u200B]/g, '');
                             if (rawText === '' || node.classList.contains('pi-image-collection')) return;
@@ -329,30 +304,18 @@
                                 }
                             }
                         });
-                        infobox.remove(); // 解析完畢，從文章中刪除
+                        infobox.remove(); 
                     }
 
                     if (characterImages.length === 0) characterImages.push({ url: 'https://via.placeholder.com/350x450?text=無圖片', label: '預設' });
 
                     // ==========================================
-                    // 🧹 空殼終結者：解決空心黑點點的問題
-                    // ==========================================
-                    doc.querySelectorAll('li, p, div, span').forEach(el => {
-                        // 如果這個標籤裡面「完全沒有字」，而且「沒有圖片或影片」，就直接粉碎它！
-                        if (el.textContent.replace(/[\s\xA0\u200B]/g, '') === '' && !el.querySelector('img') && !el.querySelector('iframe')) {
-                            el.remove();
-                        }
-                    });
-
-                    // ==========================================
-                    // 渲染到畫面 (填入藍圖框框中)
+                    // 渲染到畫面
                     // ==========================================
                     
-                    // 1. 渲染右側資料
-                    if (!rightPanelHtml) rightPanelHtml = `<div class="info-row"><div class="info-val">此角色可能沒有詳細的表格資料。</div></div>`;
+                    if (!rightPanelHtml) rightPanelHtml = `<div class="info-row"><div class="info-val">此角色沒有表格資料。</div></div>`;
                     document.getElementById('dash-right').innerHTML = s2tConverter(rightPanelHtml);
                     
-                    // 2. 渲染左側切換按鈕
                     const controlsContainer = document.getElementById('dash-img-controls');
                     controlsContainer.innerHTML = '';
                     characterImages.forEach((imgObj, index) => {
@@ -364,7 +327,7 @@
                     });
                     changeDashboardImage(0, controlsContainer.firstChild);
 
-                    // 3. 渲染下方文章
+                    // 渲染下方文章
                     function translateTextNodes(node) {
                         if (node.nodeType === 3) node.nodeValue = s2tConverter(node.nodeValue);
                         else if (node.nodeType === 1 && node.nodeName !== 'SCRIPT' && node.nodeName !== 'STYLE') {
