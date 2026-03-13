@@ -6,7 +6,7 @@
     <meta name="referrer" content="no-referrer">
     
     <title>FF14 灰機 Wiki 快速查詢</title>
-    <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js"></script>
+    <script src="https://unpkg.com/opencc-js@1.0.5/dist/umd/full.js"></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; color: #333; max-width: 1100px; margin: 50px auto; padding: 20px; }
         .search-container { display: flex; gap: 10px; margin-bottom: 20px; }
@@ -76,7 +76,7 @@
                     if (e.key === 'Enter') document.getElementById('searchBtn').click();
                 });
             } catch (error) {
-                document.getElementById('result').innerHTML = `<span class="error">OpenCC 載入失敗。</span>`;
+                document.getElementById('result').innerHTML = `<span class="error">OpenCC 載入失敗，請確認網路或重新整理。</span>`;
             }
         };
 
@@ -123,6 +123,7 @@
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(htmlContent, 'text/html');
 
+                // 處理圖片路徑
                 doc.querySelectorAll('img').forEach(img => {
                     let realSrc = img.getAttribute('data-src') || img.getAttribute('data-lazy-src') || img.getAttribute('src');
                     if (realSrc) {
@@ -134,14 +135,24 @@
                     img.removeAttribute('srcset');
                 });
 
+                // ★ 關鍵修復：沒收圖片的超連結，防止跳轉 ★
                 doc.querySelectorAll('a').forEach(a => {
-                    let href = a.getAttribute('href');
-                    if (href && href.startsWith('/')) {
-                        a.href = 'https://ff14.huijiwiki.com' + href;
+                    // 如果這個超連結裡面包著圖片，直接刪除它的 href 屬性
+                    if (a.querySelector('img')) {
+                        a.removeAttribute('href');
+                        a.removeAttribute('target');
+                        a.style.cursor = 'zoom-in';
+                    } else {
+                        // 如果只是一般的文字超連結，則補全網址並設定開新分頁
+                        let href = a.getAttribute('href');
+                        if (href && href.startsWith('/')) {
+                            a.href = 'https://ff14.huijiwiki.com' + href;
+                        }
+                        a.target = '_blank';
                     }
-                    a.target = '_blank';
                 });
 
+                // 安全翻譯
                 function translateTextNodes(node) {
                     if (node.nodeType === 3) { 
                         node.nodeValue = s2tConverter(node.nodeValue);
@@ -163,7 +174,7 @@
                 // 將內容放入網頁
                 resultDiv.innerHTML = finalHtml + readMoreBtn;
 
-                // 💡 在內容放入後，啟動燈箱魔法 💡
+                // 啟動燈箱魔法
                 setupLightbox();
 
             } catch (error) {
@@ -177,38 +188,20 @@
             const lightbox = document.getElementById('lightbox');
             const lightboxImg = document.getElementById('lightbox-img');
 
-            // 找出所有剛剛產生的圖片
             document.querySelectorAll('#result img').forEach(img => {
-                
-                // 1. 攔截圖片外層的 <a> 標籤，防止點擊後跳轉到 Wiki
-                const parentLink = img.closest('a');
-                if (parentLink) {
-                    parentLink.addEventListener('click', (e) => {
-                        e.preventDefault(); 
-                    });
-                }
-
-                // 2. 綁定圖片點擊事件
                 img.addEventListener('click', (e) => {
-                    e.stopPropagation(); // 防止事件干擾
-                    let imgSrc = img.src;
+                    e.preventDefault();
+                    e.stopPropagation();
                     
-                    // 神奇還原術：把縮圖路徑 (包含 /thumb/ 以及結尾的解析度設定) 砍掉，變回高畫質原圖
-                    // 例如：.../images/thumb/a/ab/File.png/300px-File.png -> .../images/a/ab/File.png
-                    if (imgSrc.includes('/thumb/')) {
-                        imgSrc = imgSrc.replace('/thumb/', '/').replace(/\/[^\/]+$/, '');
-                    }
-                    
-                    // 將原圖放入燈箱並顯示
-                    lightboxImg.src = imgSrc;
+                    // ★ 關鍵修復：直接拿畫面上已經顯示成功的圖片網址，絕不破圖 ★
+                    lightboxImg.src = img.src;
                     lightbox.style.display = 'flex';
                 });
             });
 
-            // 點擊燈箱的任意地方就關閉它
             lightbox.addEventListener('click', () => {
                 lightbox.style.display = 'none';
-                lightboxImg.src = ''; // 清空圖片避免下次打開時閃爍舊圖
+                lightboxImg.src = ''; 
             });
         }
     </script>
