@@ -5,44 +5,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="referrer" content="no-referrer">
     
-    <title>FF14 角色資訊面板</title>
+    <title>FF14 角色專屬資訊卡</title>
     <style>
         /* === 🌐 基礎設定 === */
-        body { font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif; background-color: #f3f4f6; color: #1f2937; max-width: 1200px; margin: 30px auto; padding: 20px; }
-        h1 { text-align: center; color: #111827; margin-bottom: 20px; font-weight: 800; letter-spacing: 1px; }
-        .version-tag { font-size: 14px; color: #16a34a; font-weight: bold; vertical-align: middle; background: #dcfce7; padding: 4px 8px; border-radius: 8px; border: 1px solid #86efac; }
+        body { font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif; background-color: #f1f5f9; color: #1e293b; max-width: 1200px; margin: 30px auto; padding: 20px; }
+        h1 { text-align: center; color: #0f172a; margin-bottom: 20px; font-weight: 900; letter-spacing: 1px; }
+        .version-tag { font-size: 14px; color: #059669; font-weight: bold; vertical-align: middle; background: #d1fae5; padding: 4px 10px; border-radius: 8px; border: 1px solid #6ee7b7; }
         
         /* === 🔍 搜尋列 === */
         .find-panel { display: flex; gap: 10px; margin-bottom: 30px; justify-content: center; }
-        #findInput { width: 100%; max-width: 500px; padding: 14px 20px; font-size: 16px; border: 2px solid #d1d5db; border-radius: 30px; outline: none; transition: 0.3s; }
+        #findInput { width: 100%; max-width: 500px; padding: 14px 20px; font-size: 16px; border: 2px solid #cbd5e1; border-radius: 30px; outline: none; transition: 0.3s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
         #findInput:focus { border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79,70,229,0.2); }
-        #findBtn { padding: 14px 30px; font-size: 16px; background: #4f46e5; color: white; border: none; border-radius: 30px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        #findBtn:hover { background: #4338ca; transform: translateY(-2px); }
+        #findBtn { padding: 14px 30px; font-size: 16px; background: linear-gradient(135deg, #4f46e5, #3730a3); color: white; border: none; border-radius: 30px; cursor: pointer; font-weight: bold; transition: 0.2s; box-shadow: 0 4px 6px rgba(79,70,229,0.3); }
+        #findBtn:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(79,70,229,0.4); }
 
+        /* 系統訊息區 */
         .loading, .error, .warning { background: white; padding: 20px; border-radius: 12px; text-align: center; font-weight: bold; font-size: 16px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .loading { color: #4f46e5; border-left: 4px solid #4f46e5; }
-        .error { color: #ef4444; border-left: 4px solid #ef4444; }
+        .loading { color: #4f46e5; border-left: 5px solid #4f46e5; }
+        .error { color: #ef4444; border-left: 5px solid #ef4444; }
 
         /* =========================================
-           ⭐️ 完美對應「附圖三」架構的儀表板 ⭐️
+           ⭐️ 完美對應「附圖三」的單一卡片架構 ⭐️
            ========================================= */
-        #custom-dashboard {
-            display: none;
-            flex-direction: row;
-            gap: 30px;
+        #main-card {
+            display: none; /* 載入完成前隱藏 */
             background: #ffffff;
             border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            padding: 35px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            border: 1px solid #e2e8f0;
             margin-bottom: 40px;
         }
 
-        /* 💡 區塊一：左側 (人物照片 + 版本按鈕) */
-        #dash-left { flex: 0 0 350px; display: flex; flex-direction: column; gap: 15px; }
-        #dash-img-container {
-            width: 100%; height: 450px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px;
-            display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative;
+        /* 💡 最上方的總標題 */
+        .card-main-title {
+            font-size: 26px;
+            font-weight: 900;
+            color: #0f172a;
+            margin-top: 0;
+            margin-bottom: 25px;
+            padding-bottom: 12px;
+            border-bottom: 3px solid #4f46e5;
+            display: inline-block;
         }
+
+        /* 💡 上半部：左右分欄 */
+        .card-top-flex { display: flex; flex-direction: row; gap: 35px; margin-bottom: 40px; }
+        
+        /* 左側：人物照片 + 版本按鈕 */
+        .card-left { flex: 0 0 350px; display: flex; flex-direction: column; gap: 15px; }
+        #dash-img-container { width: 100%; height: 450px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         #dash-main-img { max-width: 100%; max-height: 100%; object-fit: contain; cursor: zoom-in; transition: opacity 0.3s ease; }
         
         #dash-img-controls { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; }
@@ -50,148 +62,112 @@
         .img-btn:hover { background: #e2e8f0; }
         .img-btn.active { background: #4f46e5; color: white; border-color: #4f46e5; box-shadow: 0 4px 6px rgba(79,70,229,0.2); }
 
-        /* 💡 區塊二：右側 (角色信息逐列呈現) */
-        #dash-right { flex: 1; display: flex; flex-direction: column; gap: 0; overflow-y: auto; max-height: 550px; padding-right: 15px; }
-        #dash-right::-webkit-scrollbar { width: 6px; }
-        #dash-right::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        /* 右側：角色信息逐列呈現 */
+        .card-right { flex: 1; display: flex; flex-direction: column; gap: 0; overflow-y: auto; max-height: 550px; padding-right: 15px; }
+        .card-right::-webkit-scrollbar { width: 6px; }
+        .card-right::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         
-        .dash-section-title { font-size: 22px; font-weight: 800; color: #111827; border-bottom: 3px solid #4f46e5; padding-bottom: 10px; margin: 0 0 15px 0; display: inline-block; }
-        .dash-group-title { font-size: 16px; font-weight: bold; color: #ffffff; margin: 15px 0 5px 0; background: #4f46e5; padding: 8px 15px; border-radius: 6px; }
-        
-        /* 逐列式呈現的排版 */
-        .dash-row { display: flex; align-items: flex-start; padding: 12px 0; border-bottom: 1px dashed #e5e7eb; font-size: 15px; line-height: 1.6; }
+        .dash-group-title { font-size: 17px; font-weight: 900; color: #ffffff; margin: 15px 0 5px 0; background: #4f46e5; padding: 8px 15px; border-radius: 6px; letter-spacing: 1px; }
+        .dash-row { display: flex; align-items: flex-start; padding: 12px 0; border-bottom: 1px dashed #e2e8f0; font-size: 15px; line-height: 1.6; }
         .dash-row:last-child { border-bottom: none; }
-        .dash-lbl { flex: 0 0 130px; font-weight: bold; color: #6b7280; padding-top: 2px; }
-        .dash-val { flex: 1; color: #1f2937; }
+        .dash-lbl { flex: 0 0 130px; font-weight: 800; color: #64748b; padding-top: 2px; }
+        .dash-val { flex: 1; color: #1e293b; }
         .dash-val a { color: #3b82f6; text-decoration: none; font-weight: bold; }
         .dash-val a:hover { text-decoration: underline; }
 
-        /* 沒有冒號的清單會變成藍色圓角標籤 */
+        /* 消滅黑點點的魔法：轉化為圓角標籤 */
         .pill-container { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
         .dash-pill { background: #e0e7ff; color: #3730a3; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; display: inline-block; border: 1px solid #c7d2fe; }
 
-        /* 💡 區塊三：下方 (人物詳細資料) */
-        #wiki-content { background: #ffffff; border-radius: 16px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); display: none; line-height: 1.8; font-size: 16px; overflow-x: auto; }
+        /* 💡 下半部：人物詳細資料 (簡介以後的排版) */
+        .card-bottom-section { border-top: 2px dashed #cbd5e1; padding-top: 30px; line-height: 1.8; font-size: 16px; color: #334155; }
+        .bottom-title { font-size: 20px; font-weight: 800; color: #1e293b; margin-bottom: 20px; display: inline-block; border-left: 5px solid #4f46e5; padding-left: 10px; }
+        
+        /* 內部文章排版美化 */
         #wiki-content table.wikitable { width: 100%; border-collapse: collapse; margin: 20px 0; box-shadow: 0 0 0 1px #d1d5db; border-radius: 8px; overflow: hidden; }
         #wiki-content table.wikitable th, #wiki-content table.wikitable td { border: 1px solid #d1d5db; padding: 12px; }
-        #wiki-content table.wikitable th { background: #f3f4f6; color: #111827; }
-        #wiki-content img { max-width: 100%; height: auto; border-radius: 8px; cursor: zoom-in; }
+        #wiki-content table.wikitable th { background: #f8fafc; color: #0f172a; }
+        #wiki-content img { max-width: 100%; height: auto; border-radius: 8px; cursor: zoom-in; margin: 10px 0; }
         
         .navbox, .mw-editsection, .noprint, .toc, .pi-header { display: none !important; }
         .read-more { display: block; margin-top: 40px; text-align: center; font-size: 16px; font-weight: bold; padding: 15px; background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 12px; color: #475569; transition: 0.2s; text-decoration: none; }
         .read-more:hover { background: #e2e8f0; color: #0f172a; }
 
-        /* 💡 燈箱設計 */
+        /* 燈箱 */
         #lightbox { display: none; position: fixed; z-index: 999999; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); align-items: center; justify-content: center; flex-direction: column; backdrop-filter: blur(5px); }
         #lightbox img { max-width: 90%; max-height: 85vh; border-radius: 8px; border: 3px solid #fff; box-shadow: 0 10px 40px rgba(0,0,0,0.8); object-fit: contain; }
         #lightbox-close { color: white; margin-top: 25px; padding: 10px 30px; font-size: 16px; background: rgba(255,255,255,0.2); border-radius: 30px; cursor: pointer; font-weight: bold; border: 1px solid rgba(255,255,255,0.4); transition: 0.2s; }
         #lightbox-close:hover { background: rgba(255,255,255,0.3); transform: scale(1.05); }
 
-        @media (max-width: 800px) {
-            #custom-dashboard { flex-direction: column; }
-            #dash-left { flex: auto; width: 100%; }
-        }
+        @media (max-width: 900px) { .card-top-flex { flex-direction: column; } .card-left { flex: auto; width: 100%; } }
     </style>
 </head>
 <body>
 
-    <h1>🗡️ FF14 角色資訊面板 <span class="version-tag">(v9.0 究極防卡死版)</span></h1>
+    <h1>🗡️ FF14 角色資訊面板 <span class="version-tag">(v11.0 完美草圖重鑄版)</span></h1>
     
     <div class="find-panel">
-        <input type="text" id="findInput" placeholder="請輸入關鍵字（例如：塔塔露...）" value="塔塔露">
+        <input type="text" id="findInput" placeholder="請輸入關鍵字（例如：塔塔露、曼城茶座...）" value="塔塔露">
         <button id="findBtn">搜尋角色</button>
     </div>
 
     <div id="status-msg"></div>
 
-    <div id="custom-dashboard">
-        <div id="dash-left">
-            <div id="dash-img-container">
-                <img id="dash-main-img" src="" alt="角色圖片">
+    <div id="main-card">
+        <div class="card-main-title">人物詳細資料</div>
+        
+        <div class="card-top-flex">
+            <div class="card-left">
+                <div id="dash-img-container">
+                    <img id="dash-main-img" src="" alt="角色圖片">
+                </div>
+                <div id="dash-img-controls"></div>
             </div>
-            <div id="dash-img-controls"></div>
+            
+            <div class="card-right" id="dash-right">
+                </div>
         </div>
-        <div id="dash-right"></div>
-    </div>
 
-    <div id="wiki-content"></div>
+        <div class="card-bottom-section">
+            <div class="bottom-title">生平經歷與詳細介紹</div>
+            <div id="wiki-content"></div>
+        </div>
+    </div>
 
     <div id="lightbox">
         <img id="lightbox-img" src="" alt="放大圖片">
         <div id="lightbox-close">✖ 點擊關閉</div>
     </div>
 
-    <script src="https://unpkg.com/opencc-js@1.0.5/dist/umd/full.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js"></script>
 
     <script>
-        // ⭐️ 核心防禦：確保網頁元素都準備好後，才強制綁定按鈕
         document.addEventListener('DOMContentLoaded', () => {
             const btn = document.getElementById('findBtn');
             const input = document.getElementById('findInput');
             const statusMsg = document.getElementById('status-msg');
+            const mainCard = document.getElementById('main-card');
             let characterImages = [];
 
-            // 強制綁定點擊與 Enter 鍵
             btn.addEventListener('click', triggerSearch);
-            input.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') triggerSearch();
-            });
+            input.addEventListener('keypress', (e) => { if (e.key === 'Enter') triggerSearch(); });
 
-            // 觸發搜尋的主流程
             function triggerSearch() {
                 try {
                     const keyword = input.value.trim();
-                    if (!keyword) {
-                        statusMsg.innerHTML = `<div class="warning">⚠️ 請輸入要搜尋的角色名稱！</div>`;
-                        return;
-                    }
-                    // 按下按鈕，畫面立刻給予反應！
-                    statusMsg.innerHTML = `<div class="loading">🟢 系統啟動，正在鎖定目標「${keyword}」...</div>`;
-                    document.getElementById('custom-dashboard').style.display = 'none';
-                    document.getElementById('wiki-content').style.display = 'none';
+                    if (!keyword) return;
+                    
+                    statusMsg.innerHTML = `<div class="loading">🟢 啟動突破協議，正透過代理伺服器連接...</div>`;
+                    mainCard.style.display = 'none'; // 隱藏整個卡片
 
-                    // 啟動非同步抓取
                     executeDashboardBuild(keyword);
                 } catch (err) {
                     statusMsg.innerHTML = `<div class="error">💥 啟動失敗：${err.message}</div>`;
                 }
             }
 
-            // 帶有「逾時保護」的 JSONP 魔法
-            function fetchJsonp(url, timeout = 10000) {
-                return new Promise((resolve, reject) => {
-                    const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
-                    let script = document.createElement('script');
-                    
-                    // 10秒防卡死計時器
-                    const timer = setTimeout(() => {
-                        cleanup();
-                        reject(new Error('伺服器連線逾時，灰機 Wiki 無回應'));
-                    }, timeout);
-
-                    function cleanup() {
-                        if (script.parentNode) document.body.removeChild(script);
-                        delete window[callbackName];
-                        clearTimeout(timer);
-                    }
-
-                    window[callbackName] = function(data) {
-                        cleanup();
-                        resolve(data);
-                    };
-
-                    script.src = url + '&callback=' + callbackName;
-                    script.onerror = () => {
-                        cleanup();
-                        reject(new Error('連線被瀏覽器阻擋或網路異常'));
-                    };
-                    document.body.appendChild(script);
-                });
-            }
-
             async function executeDashboardBuild(keyword) {
                 try {
-                    // 安全初始化翻譯器
                     let s2tConverter = (text) => text;
                     let t2sConverter = (text) => text;
 
@@ -203,30 +179,34 @@
                     }
 
                     const searchKeyword = t2sConverter(keyword);
-                    statusMsg.innerHTML = `<div class="loading">🚀 正在連接以太之光抓取資料...</div>`;
+                    statusMsg.innerHTML = `<div class="loading">🚀 繞過防火牆中，正在提取資料... (約需3-5秒)</div>`;
 
-                    const baseUrl = "https://ff14.huijiwiki.com/api.php";
-                    const params = new URLSearchParams({
-                        action: "parse",
-                        format: "json",
-                        page: searchKeyword,
-                        redirects: "1",
-                        prop: "text"
-                    });
+                    // ⭐️ 使用 allorigins 代理伺服器，100% 避開 CORS 與超時問題 ⭐️
+                    const targetUrl = `https://ff14.huijiwiki.com/api.php?action=parse&format=json&page=${encodeURIComponent(searchKeyword)}&redirects=1&prop=text`;
+                    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
 
-                    // 執行抓取
-                    const data = await fetchJsonp(`${baseUrl}?${params.toString()}`);
+                    const response = await fetch(proxyUrl);
+                    if (!response.ok) throw new Error("代理伺服器連線失敗，請稍後再試。");
 
-                    if (data.error) {
+                    const proxyData = await response.json();
+                    
+                    let data;
+                    try {
+                        data = JSON.parse(proxyData.contents);
+                    } catch(e) {
+                        throw new Error("取得的資料格式異常，可能是灰機 Wiki 正在維護中。");
+                    }
+
+                    if (data.error || !data.parse) {
                         statusMsg.innerHTML = `<div class="error">找不到關於「${keyword}」的資訊。</div>`;
                         return;
                     }
 
-                    statusMsg.innerHTML = `<div class="loading">🔨 資料取得成功，正在組裝客製化面板...</div>`;
+                    statusMsg.innerHTML = `<div class="loading">🔨 資料取得成功，正在組裝最終面板...</div>`;
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(data.parse.text['*'], 'text/html');
 
-                    // ⚠️ 物理超渡 2.0：絕對剝除所有圖片外層的超連結，保證絕不跳轉原網站！
+                    // 物理剝除 a 標籤防止跳轉
                     doc.querySelectorAll('a').forEach(a => {
                         const img = a.querySelector('img');
                         if (img) {
@@ -239,7 +219,6 @@
                         }
                     });
 
-                    // 砍掉無用編輯按鈕，避免干擾抓取
                     doc.querySelectorAll('.mw-editsection, .noprint, style, script').forEach(e => e.remove());
 
                     const infobox = doc.querySelector('.infobox, .portable-infobox, table[class*="infobox"]');
@@ -276,20 +255,18 @@
                             } else if (img.getAttribute('alt') && img.getAttribute('alt').length < 15) {
                                 label = img.getAttribute('alt');
                             }
-
                             characterImages.push({ url: src, label: label });
                         });
 
                         if (characterImages.length === 0) characterImages.push({ url: 'https://via.placeholder.com/350x450?text=無圖片', label: '預設' });
 
-                        // === 2. ⭐️ 全新解體魔法：將清單轉化為逐列排版 ⭐️ ===
+                        // === 2. 逐列排版魔法 (解決黑點點與相關信息不見) ===
                         let rightPanelHtml = '';
                         const mainTabs = infobox.querySelectorAll('.huiji-tab-content > .tab-pane, .pi-theme-default > .tabber > .tabbertab');
 
                         function extractRows(container) {
                             let html = '';
                             
-                            // Fandom 表格版型
                             if (container.querySelector('.pi-data')) {
                                 container.querySelectorAll('.pi-header, .pi-data').forEach(node => {
                                     if (node.classList.contains('pi-header')) {
@@ -304,7 +281,6 @@
                                 return html;
                             }
 
-                            // 傳統表格版型
                             const rows = container.querySelectorAll('tr');
                             if (rows.length > 0) {
                                 rows.forEach(tr => {
@@ -315,7 +291,6 @@
                                 });
                             }
 
-                            // ⭐️ 處理「帶黑點點的清單」進行冒號解體 ⭐️
                             const lists = container.querySelectorAll('li');
                             let hasListPills = false;
                             let pillHtml = '<div class="pill-container">';
@@ -342,23 +317,16 @@
                             pillHtml += '</div>';
                             if (hasListPills) html += pillHtml;
 
-                            if (html === '') {
-                                container.querySelectorAll('p').forEach(p => {
-                                    if(p.textContent.trim()) html += `<div class="dash-row"><div class="dash-val">${p.innerHTML}</div></div>`;
-                                });
-                            }
-
                             return html;
                         }
 
                         if (mainTabs.length > 0) {
                             mainTabs.forEach(tab => {
                                 let tabTitle = tab.getAttribute('title') || tab.getAttribute('data-title') || '資料';
-                                rightPanelHtml += `<div class="dash-section-title">${tabTitle}</div>`;
+                                rightPanelHtml += `<div class="dash-group-title" style="background:#1e293b; color:white;">📌 ${tabTitle}</div>`;
                                 rightPanelHtml += extractRows(tab);
                             });
                         } else {
-                            rightPanelHtml += `<div class="dash-section-title">角色與相關信息</div>`;
                             rightPanelHtml += extractRows(infobox);
                         }
 
@@ -375,9 +343,7 @@
                         });
 
                         changeDashboardImage(0, controlsContainer.firstChild);
-
                         infobox.remove(); 
-                        document.getElementById('custom-dashboard').style.display = 'flex';
                     }
 
                     // === 3. 處理下方文章 ===
@@ -409,14 +375,15 @@
                     document.getElementById('status-msg').innerHTML = '';
                     
                     const wikiUrl = `https://ff14.huijiwiki.com/wiki/${encodeURIComponent(data.parse.title)}`;
-                    const readMoreBtn = `<a href="${wikiUrl}" target="_blank" class="read-more">🔗 前往灰機 Wiki 閱讀完整條目</a>`;
+                    const readMoreBtn = `<a href="${wikiUrl}" target="_blank" class="read-more">🔗 前往原站閱讀完整條目</a>`;
                     
-                    const contentDiv = document.getElementById('wiki-content');
-                    contentDiv.innerHTML = `<div class="dash-section-title" style="margin-top:0;">人物詳細資料</div>` + rootNode.innerHTML + readMoreBtn;
-                    contentDiv.style.display = 'block';
+                    document.getElementById('wiki-content').innerHTML = rootNode.innerHTML + readMoreBtn;
+                    
+                    // 顯示終極面板
+                    mainCard.style.display = 'block';
 
                 } catch (error) {
-                    statusMsg.innerHTML = `<div class="error">發生未預期的錯誤：${error.message}</div>`;
+                    document.getElementById('status-msg').innerHTML = `<div class="error">發生錯誤：${error.message}</div>`;
                 }
             }
 
@@ -437,7 +404,7 @@
                 }
             };
 
-            // 💡 全局燈箱攔截系統
+            // 全局燈箱
             document.addEventListener('click', function(e) {
                 if (e.target.tagName === 'IMG' && e.target.id !== 'lightbox-img') {
                     e.preventDefault(); 
