@@ -42,7 +42,7 @@
         
         /* 左側：照片 + 按鈕 */
         .card-left { flex: 0 0 350px; display: flex; flex-direction: column; gap: 15px; }
-        #dash-img-container { width: 100%; height: 450px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        #dash-img-container { width: 100%; height: 450px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
         #dash-main-img { max-width: 100%; max-height: 100%; object-fit: contain; cursor: zoom-in; transition: opacity 0.3s ease; }
         #dash-img-controls { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; }
         .img-btn { background: #ffffff; color: #475569; border: 1px solid #cbd5e1; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: bold; transition: 0.2s; }
@@ -89,7 +89,7 @@
 </head>
 <body>
 
-    <h1>🗡️ FF14 角色資訊面板 <span class="version-tag">(v12 多重突破版)</span></h1>
+    <h1>🗡️ FF14 角色資訊面板 <span class="version-tag">(v13333 破除幻象版)</span></h1>
     
     <div class="find-panel">
         <input type="text" id="findInput" placeholder="請輸入關鍵字（例如：塔塔露...）" value="塔塔露">
@@ -139,63 +139,80 @@
                     const keyword = input.value.trim();
                     if (!keyword) return;
                     
-                    statusMsg.innerHTML = `<div class="loading">🟢 啟動四重突破協議，尋找最佳連線路徑...</div>`;
                     mainCard.style.display = 'none';
-
                     executeDashboardBuild(keyword);
                 } catch (err) {
                     statusMsg.innerHTML = `<div class="error">💥 啟動失敗：${err.message}</div>`;
                 }
             }
 
-            // 傳統 JSONP 備案
-            function fetchJsonp(url) {
+            function fetchJsonp(url, timeout = 8000) {
                 return new Promise((resolve, reject) => {
                     const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
-                    window[callbackName] = function(data) {
+                    let script = document.createElement('script');
+                    
+                    const timer = setTimeout(() => {
+                        cleanup();
+                        reject(new Error('JSONP Timeout'));
+                    }, timeout);
+
+                    function cleanup() {
+                        if (script.parentNode) document.body.removeChild(script);
                         delete window[callbackName];
-                        document.body.removeChild(script);
+                        clearTimeout(timer);
+                    }
+
+                    window[callbackName] = function(data) {
+                        cleanup();
                         resolve(data);
                     };
-                    const script = document.createElement('script');
+
                     script.src = url + '&callback=' + callbackName;
-                    script.onerror = () => reject(new Error('JSONP 被阻擋'));
+                    script.onerror = () => { cleanup(); reject(new Error('JSONP Error')); };
                     document.body.appendChild(script);
                 });
             }
 
-            // ⭐️ 核心魔法：四重多通道連線機制 ⭐️
-            async function superFetch(searchKeyword) {
+            // ⭐️ 核心防護魔法：不再被假錯誤騙了 ⭐️
+            async function superFetch(searchKeyword, statusMsg) {
                 const targetUrl = `https://ff14.huijiwiki.com/api.php?action=parse&format=json&page=${encodeURIComponent(searchKeyword)}&redirects=1&prop=text`;
                 
-                // 通道 1: 原生 CORS 跨域 (最快且不被 Cloudflare 阻擋)
-                try {
-                    let res = await fetch(targetUrl + '&origin=*');
-                    let data = await res.json();
-                    if (data.parse || data.error) return data;
-                } catch(e) { console.log('通道1失敗'); }
+                // 嚴格檢驗：只要不是「真正成功的資料」或「確定無此頁面」，一律當成是被防火牆擋下！
+                const isValid = (data) => {
+                    if (data && data.parse) return true;
+                    // missingtitle 才是真正的找不到頁面，其餘的 badorigin 等通通是防火牆的幻象
+                    if (data && data.error && data.error.code === 'missingtitle') return true;
+                    return false;
+                };
 
-                // 通道 2: AllOrigins Raw 代理伺服器
+                statusMsg.innerHTML = `<div class="loading">🚀 啟動通道 1 (原生腳本直連)...</div>`;
+                try {
+                    let data = await fetchJsonp(targetUrl);
+                    if (isValid(data)) return data;
+                } catch(e) {}
+
+                statusMsg.innerHTML = `<div class="loading">🚀 通道 1 受阻，切換通道 2 (AllOrigins 代理)...</div>`;
                 try {
                     let res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`);
                     let data = await res.json();
-                    if (data.parse || data.error) return data;
-                } catch(e) { console.log('通道2失敗'); }
+                    if (isValid(data)) return data;
+                } catch(e) {}
 
-                // 通道 3: CorsProxy.io 代理伺服器
+                statusMsg.innerHTML = `<div class="loading">🚀 通道 2 受阻，切換通道 3 (CorsProxy 代理)...</div>`;
                 try {
                     let res = await fetch(`https://corsproxy.io/?${encodeURIComponent(targetUrl)}`);
                     let data = await res.json();
-                    if (data.parse || data.error) return data;
-                } catch(e) { console.log('通道3失敗'); }
+                    if (isValid(data)) return data;
+                } catch(e) {}
 
-                // 通道 4: JSONP 古老魔法
+                statusMsg.innerHTML = `<div class="loading">🚀 切換最後通道 (跨域強登)...</div>`;
                 try {
-                    let data = await fetchJsonp(targetUrl);
-                    if (data.parse || data.error) return data;
-                } catch(e) { console.log('通道4失敗'); }
+                    let res = await fetch(targetUrl + '&origin=*');
+                    let data = await res.json();
+                    if (isValid(data)) return data;
+                } catch(e) {}
 
-                throw new Error("灰機 Wiki 防火牆無情地攔截了所有的請求。請稍後再試！");
+                throw new Error("所有連線通道皆被防火牆無情攔截，請稍後再試。");
             }
 
             async function executeDashboardBuild(keyword) {
@@ -209,11 +226,11 @@
                     }
 
                     const searchKeyword = t2sConverter(keyword);
-                    statusMsg.innerHTML = `<div class="loading">🚀 正在閃避防火牆，嘗試提取資料...</div>`;
 
-                    // 執行多重突破
-                    let data = await superFetch(searchKeyword);
+                    // 執行具備防騙機制的多重連線
+                    let data = await superFetch(searchKeyword, statusMsg);
 
+                    // 只有真的回傳 missingtitle，才會顯示這行
                     if (data.error) {
                         statusMsg.innerHTML = `<div class="error">找不到關於「${keyword}」的資訊。</div>`;
                         return;
@@ -223,7 +240,7 @@
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(data.parse.text['*'], 'text/html');
 
-                    // 剝除超連結
+                    // 物理超渡超連結
                     doc.querySelectorAll('a').forEach(a => {
                         const img = a.querySelector('img');
                         if (img) {
