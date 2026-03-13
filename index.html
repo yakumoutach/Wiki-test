@@ -8,41 +8,63 @@
     <title>FF14 灰機 Wiki 快速查詢</title>
     <script src="https://unpkg.com/opencc-js@1.0.5/dist/umd/full.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; color: #333; max-width: 1100px; margin: 50px auto; padding: 20px; }
+        body { font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif; background-color: #f4f4f9; color: #333; max-width: 1100px; margin: 50px auto; padding: 20px; }
         .search-container { display: flex; gap: 10px; margin-bottom: 20px; }
-        input[type="text"] { flex-grow: 1; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; }
-        button { padding: 10px 20px; font-size: 16px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; transition: 0.3s; }
-        button:hover { background-color: #45a049; }
-        #result { background-color: white; padding: 30px; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); min-height: 100px; line-height: 1.6; overflow: hidden; font-size: 15px; }
+        input[type="text"] { flex-grow: 1; padding: 12px; font-size: 16px; border: 1px solid #ccc; border-radius: 6px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05); }
+        button { padding: 10px 24px; font-size: 16px; background-color: #4CAF50; color: white; border: none; border-radius: 6px; cursor: pointer; transition: 0.2s; font-weight: bold; }
+        button:hover { background-color: #45a049; transform: translateY(-1px); }
+        
+        #result { background-color: white; padding: 35px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); min-height: 100px; line-height: 1.7; font-size: 16px; overflow: hidden; }
         .loading { color: #8a2be2; font-style: italic; font-weight: bold; }
         .error { color: #d32f2f; font-weight: bold; }
         
-        .infobox { float: right; width: 320px; background: #f9f9f9; border: 1px solid #aaa; padding: 10px; margin: 0 0 15px 20px; font-size: 13px; }
-        .infobox th { background-color: #e0e0e0; text-align: center; padding: 5px; }
-        .infobox td { padding: 5px; border-bottom: 1px solid #eee; }
-        table.wikitable { border-collapse: collapse; width: 100%; margin: 15px 0; }
-        table.wikitable th, table.wikitable td { border: 1px solid #a2a9b1; padding: 8px; }
-        table.wikitable th { background-color: #eaecf0; text-align: center; }
+        /* === 👑 資訊框 (Infobox) 終極美化 === */
+        .infobox, .portable-infobox, table.infobox { 
+            float: right; width: 340px; background: #ffffff; border: 1px solid #e2e8f0; 
+            border-radius: 8px; padding: 15px; margin: 0 0 25px 25px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); font-size: 14px; 
+        }
+        .infobox th { background-color: #f8fafc; color: #1e293b; text-align: center; padding: 10px; border-radius: 6px; font-weight: bold; border-bottom: 2px solid #e2e8f0; }
+        .infobox td { padding: 10px 8px; border-bottom: 1px solid #f1f5f9; }
+        /* 強制拔除資訊框內的醜陋黑點點 */
+        .infobox ul { list-style-type: none !important; padding: 0 !important; margin: 0 !important; }
+        .infobox li { padding: 8px 0 !important; border-bottom: 1px dashed #e2e8f0; }
+        .infobox li:last-child { border-bottom: none; }
         
-        ul.gallery { display: flex; flex-wrap: wrap; padding: 0; margin: 15px 0; list-style-type: none; justify-content: flex-start; }
-        li.gallerybox { margin: 10px; text-align: center; width: auto !important; }
-        li.gallerybox .thumb { border: 1px solid #ccc; background-color: #f9f9f9; padding: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        li.gallerybox img { display: block; margin: 0 auto; max-width: 150px; height: auto; cursor: zoom-in; }
-        li.gallerybox .gallerytext { font-size: 13px; color: #555; padding-top: 8px; max-width: 150px; word-wrap: break-word; }
+        /* === 📚 展開頁籤專用標題 === */
+        .custom-tab-title {
+            display: inline-block; background-color: #4CAF50; color: white;
+            padding: 4px 12px; border-radius: 4px; font-size: 13px; font-weight: bold;
+            margin: 15px 0 10px 0; letter-spacing: 1px;
+        }
+
+        /* === 🖼️ 畫廊與一般表格美化 === */
+        table.wikitable { border-collapse: collapse; width: 100%; margin: 20px 0; border-radius: 6px; overflow: hidden; }
+        table.wikitable th, table.wikitable td { border: 1px solid #cbd5e1; padding: 10px; }
+        table.wikitable th { background-color: #f1f5f9; text-align: center; color: #334155; }
+        
+        ul.gallery { display: flex; flex-wrap: wrap; padding: 0; margin: 20px 0; list-style-type: none; justify-content: flex-start; gap: 15px; }
+        li.gallerybox { text-align: center; width: auto !important; margin: 0; }
+        li.gallerybox .thumb { border: 1px solid #e2e8f0; background-color: #fff; padding: 8px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: 0.2s; }
+        li.gallerybox .thumb:hover { box-shadow: 0 4px 10px rgba(0,0,0,0.15); transform: translateY(-2px); }
+        li.gallerybox img { display: block; margin: 0 auto; max-width: 150px; height: auto; cursor: zoom-in; border-radius: 4px; }
+        li.gallerybox .gallerytext { font-size: 13px; color: #64748b; padding-top: 10px; max-width: 150px; word-wrap: break-word; line-height: 1.4; }
         
         img { max-width: 100%; height: auto; border: none; cursor: zoom-in; }
-        .thumbinner { border: 1px solid #ccc; padding: 5px; background: #f9f9f9; font-size: 13px; text-align: center; margin: 10px; float: right; }
+        .thumbinner { border: 1px solid #e2e8f0; padding: 8px; background: #fff; font-size: 13px; text-align: center; margin: 15px 0 15px 20px; float: right; border-radius: 6px; }
         .mw-parser-output::after { content: ""; display: table; clear: both; }
         .navbox, .mw-editsection, .noprint, .toc { display: none !important; }
         ul { padding-left: 20px; }
-        a { color: #0066cc; text-decoration: none; }
-        a:hover { text-decoration: underline; }
-        .read-more { display: block; margin-top: 30px; text-align: center; font-size: 16px; font-weight: bold; padding: 10px; background: #eef; border-radius: 4px; }
+        a { color: #2563eb; text-decoration: none; font-weight: 500; }
+        a:hover { text-decoration: underline; color: #1d4ed8; }
+        .read-more { display: block; margin-top: 40px; text-align: center; font-size: 16px; font-weight: bold; padding: 15px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; transition: 0.2s; }
+        .read-more:hover { background: #e2e8f0; }
 
-        #lightbox { display: none; position: fixed; z-index: 9999; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); align-items: center; justify-content: center; flex-direction: column; backdrop-filter: blur(5px); }
-        #lightbox img { max-width: 90%; max-height: 85vh; box-shadow: 0 4px 20px rgba(0,0,0,0.6); border: 4px solid #fff; border-radius: 6px; object-fit: contain; }
-        #lightbox-close { color: white; font-size: 20px; margin-top: 20px; cursor: pointer; font-weight: bold; background: rgba(255,255,255,0.2); padding: 8px 20px; border-radius: 20px; transition: 0.3s; }
-        #lightbox-close:hover { background: rgba(255,255,255,0.4); }
+        /* === 🔍 圖片放大鏡 (Lightbox) === */
+        #lightbox { display: none; position: fixed; z-index: 9999; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); align-items: center; justify-content: center; flex-direction: column; backdrop-filter: blur(8px); }
+        #lightbox img { max-width: 90%; max-height: 85vh; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 3px solid #fff; border-radius: 8px; object-fit: contain; }
+        #lightbox-close { color: white; font-size: 18px; margin-top: 25px; cursor: pointer; font-weight: bold; background: rgba(255,255,255,0.2); padding: 10px 25px; border-radius: 30px; transition: 0.2s; letter-spacing: 1px; }
+        #lightbox-close:hover { background: rgba(255,255,255,0.4); transform: scale(1.05); }
     </style>
 </head>
 <body>
@@ -99,7 +121,7 @@
             const resultDiv = document.getElementById('result');
             const searchKeyword = t2sConverter(keyword);
             
-            resultDiv.innerHTML = `<span class="loading">正在搬運資料並啟動圖片防禦機制...</span>`;
+            resultDiv.innerHTML = `<span class="loading">正在搬運資料並進行排版終極美化...</span>`;
 
             const baseUrl = "https://ff14.huijiwiki.com/api.php";
             const params = new URLSearchParams({
@@ -123,6 +145,7 @@
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(htmlContent, 'text/html');
 
+                // 處理圖片路徑
                 doc.querySelectorAll('img').forEach(img => {
                     let realSrc = img.getAttribute('data-src') || img.getAttribute('data-lazy-src') || img.getAttribute('src');
                     if (realSrc) {
@@ -134,6 +157,7 @@
                     img.removeAttribute('srcset');
                 });
 
+                // 沒收圖片超連結，防止跳轉
                 doc.querySelectorAll('a').forEach(a => {
                     if (a.querySelector('img')) {
                         a.outerHTML = a.innerHTML;
@@ -146,6 +170,28 @@
                     }
                 });
 
+                // ★ 核心修復 4：頁籤 (Tabs) 全面展開魔法 ★
+                // 1. 直接刪除那些造成「黑點點」的頁籤切換按鈕
+                doc.querySelectorAll('.nav-tabs, .tabbernav, .huiji-tabs-nav, .pi-header').forEach(nav => nav.remove());
+                
+                // 2. 將所有被隱藏的頁籤內容全部強制顯示出來，變成連續的上下區塊
+                doc.querySelectorAll('.tab-pane, .tabbertab, .huiji-tab-content').forEach(pane => {
+                    pane.style.display = 'block';
+                    pane.style.opacity = '1';
+                    pane.style.visibility = 'visible';
+                    pane.style.height = 'auto';
+                    
+                    // 如果這個頁籤有自帶標題 (例如 2.0服裝、3.0服裝)，我們幫它加上美美的自訂標籤
+                    let title = pane.getAttribute('title') || pane.getAttribute('data-title');
+                    if (title && title !== 'null') {
+                        let header = document.createElement('div');
+                        header.className = 'custom-tab-title';
+                        header.innerHTML = '✨ ' + title;
+                        pane.insertBefore(header, pane.firstChild);
+                    }
+                });
+
+                // 安全翻譯 (只翻譯文字)
                 function translateTextNodes(node) {
                     if (node.nodeType === 3) { 
                         node.nodeValue = s2tConverter(node.nodeValue);
@@ -172,14 +218,14 @@
             }
         }
 
-        // 💡 燈箱全局控制邏輯與保險機制 💡
+        // 燈箱全局控制邏輯
         document.getElementById('result').addEventListener('click', function(e) {
             if (e.target.tagName === 'IMG') {
                 e.preventDefault(); 
                 e.stopPropagation();
                 
-                const thumbSrc = e.target.src; // 畫面上已經成功顯示的小圖
-                let hdSrc = thumbSrc;          // 準備推算的高清圖
+                const thumbSrc = e.target.src; 
+                let hdSrc = thumbSrc;          
                 
                 if (hdSrc.includes('/thumb/')) {
                     hdSrc = hdSrc.replace('/thumb/', '/');
@@ -189,14 +235,11 @@
                 const lightbox = document.getElementById('lightbox');
                 const lightboxImg = document.getElementById('lightbox-img');
                 
-                // ★ 究極保險機制：如果高清原圖載入失敗（破圖），立刻退回顯示原本的縮圖 ★
                 lightboxImg.onerror = function() {
-                    console.log("高清原圖不存在，退回顯示安全縮圖！");
-                    this.onerror = null; // 取消錯誤監聽，防止無限迴圈
-                    this.src = thumbSrc; // 強制換回本來就看得到的那張圖
+                    this.onerror = null; 
+                    this.src = thumbSrc; 
                 };
 
-                // 優先嘗試載入高清圖
                 lightboxImg.src = hdSrc;
                 lightbox.style.display = 'flex';
             }
