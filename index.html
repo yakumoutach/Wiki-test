@@ -21,7 +21,7 @@
     <h1>🗡️ FF14 灰機 Wiki 快速查詢</h1>
     
     <div class="search-container">
-        <input type="text" id="searchInput" placeholder="請輸入關鍵字（例如：拂曉血盟、曼城茶座...）" value="薩雷安">
+        <input type="text" id="searchInput" placeholder="請輸入關鍵字（例如：拂曉血盟、薩雷安...）" value="薩雷安">
         <button id="searchBtn">搜尋</button>
     </div>
 
@@ -50,17 +50,27 @@
 
         async function fetchWikiData(keyword, s2tConverter, t2sConverter) {
             const resultDiv = document.getElementById('result');
-            
-            // 搜尋前：將你輸入的繁體關鍵字轉換為簡體
             const searchKeyword = t2sConverter(keyword);
             
-            resultDiv.innerHTML = `<span class="loading">正在呼叫 Vercel 後端以太之光...<br>(實際送出搜尋條目：${searchKeyword})</span>`;
+            resultDiv.innerHTML = `<span class="loading">正在發動超越之力直接讀取資料...<br>(實際送出搜尋條目：${searchKeyword})</span>`;
+
+            // 關鍵修改：我們直接用瀏覽器呼叫官方 API，並帶上 origin=* 宣告我們的正式網址
+            const baseUrl = "https://ff14.huijiwiki.com/api.php";
+            const params = new URLSearchParams({
+                action: "query",
+                format: "json",
+                prop: "extracts",
+                exintro: "",       
+                explaintext: "",   
+                titles: searchKeyword,
+                origin: "*"        // 這是 MediaWiki 專屬的跨域通行證
+            });
 
             try {
-                // 呼叫我們自己建立的 Vercel 後端 API
-                const response = await fetch(`/api/wiki?keyword=${encodeURIComponent(searchKeyword)}`);
+                // 直接抓取！
+                const response = await fetch(`${baseUrl}?${params.toString()}`);
                 
-                if (!response.ok) throw new Error(`後端回應錯誤狀態：${response.status}`);
+                if (!response.ok) throw new Error(`伺服器回應錯誤狀態：${response.status}`);
 
                 const data = await response.json();
                 const pages = data.query.pages;
