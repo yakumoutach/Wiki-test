@@ -8,91 +8,101 @@
     <title>FF14 灰機 Wiki 現代化查詢</title>
     <script src="https://unpkg.com/opencc-js@1.0.5/dist/umd/full.js"></script>
     <style>
-        /* === 🌐 全局現代化基礎設定 === */
-        body { font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif; background-color: #f0f4f8; color: #334155; max-width: 1300px; margin: 30px auto; padding: 20px; }
-        h1 { text-align: center; color: #0f172a; margin-bottom: 30px; font-weight: 800; letter-spacing: 2px; }
+        /* === 全局現代化基礎設定 === */
+        body { font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif; background-color: #f0f4f8; color: #334155; max-width: 1400px; margin: 30px auto; padding: 20px; }
+        h1 { text-align: center; color: #0f172a; margin-bottom: 30px; font-weight: 800; }
+        .version-tag { font-size: 14px; color: #64748b; font-weight: normal; vertical-align: middle; }
         
-        /* === 🔍 搜尋列美化 === */
+        /* === 搜尋列 === */
         .search-container { display: flex; gap: 10px; margin-bottom: 30px; justify-content: center; }
-        input[type="text"] { width: 100%; max-width: 500px; padding: 14px 20px; font-size: 16px; border: 2px solid #cbd5e1; border-radius: 30px; outline: none; transition: 0.3s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
-        input[type="text"]:focus { border-color: #3b82f6; box-shadow: 0 0 0 4px rgba(59,130,246,0.15); }
-        button { padding: 14px 30px; font-size: 16px; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: none; border-radius: 30px; cursor: pointer; transition: 0.3s; font-weight: bold; box-shadow: 0 4px 6px rgba(37,99,235,0.2); }
-        button:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(37,99,235,0.3); }
+        input[type="text"] { width: 100%; max-width: 500px; padding: 14px 20px; font-size: 16px; border: 2px solid #cbd5e1; border-radius: 30px; outline: none; }
+        input[type="text"]:focus { border-color: #3b82f6; }
+        button { padding: 14px 30px; font-size: 16px; background: #3b82f6; color: white; border: none; border-radius: 30px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #2563eb; }
 
-        .loading, .error { background: white; padding: 30px; border-radius: 12px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.05); font-weight: bold; font-size: 18px; width: 100%; margin-bottom: 20px; }
+        .loading, .error { background: white; padding: 30px; border-radius: 12px; text-align: center; font-weight: bold; font-size: 18px; margin-bottom: 20px; }
         .loading { color: #3b82f6; }
         .error { color: #ef4444; }
 
-        /* === 📊 雙欄式排版容器 (絕對獨立不跑版) === */
-        #result-wrapper { display: flex; gap: 30px; align-items: flex-start; margin-top: 20px; }
+        /* === ⭐️ 絕對鎖死雙欄排版 ⭐️ === */
+        #result-wrapper { 
+            display: flex; 
+            flex-direction: row; /* 強制橫向排列 */
+            gap: 30px; 
+            align-items: flex-start; 
+            margin-top: 20px; 
+            width: 100%;
+        }
         
-        /* 💡 左欄：專屬角色資訊框 */
-        #wiki-sidebar { flex: 0 0 360px; background: #ffffff; border-radius: 16px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); display: none; }
-        /* 破除 Wiki 預設寬度限制與浮動 */
-        #wiki-sidebar .infobox, #wiki-sidebar table { width: 100% !important; max-width: 100% !important; float: none !important; margin: 0 !important; border-collapse: collapse; font-size: 14px; }
-        #wiki-sidebar th { background-color: #f8fafc; color: #1e293b; padding: 12px; border-bottom: 2px solid #e2e8f0; text-align: center; font-weight: bold; border-radius: 6px; }
-        #wiki-sidebar td { padding: 12px 10px; border-bottom: 1px dashed #e2e8f0; line-height: 1.5; }
-        #wiki-sidebar td:first-child { font-weight: bold; color: #0f172a; width: 35%; }
-        /* 將原本醜陋的頁籤按鈕變成漂亮的標籤 (Pills) */
-        #wiki-sidebar ul.nav-tabs, #wiki-sidebar .huiji-tabs-nav { display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 15px 0; border: none; }
-        #wiki-sidebar ul.nav-tabs li, #wiki-sidebar .huiji-tabs-nav li { background: #e2e8f0; color: #475569; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; list-style: none; border: none; }
-        /* 清除其他點點 */
-        #wiki-sidebar ul { list-style: none; padding: 0; margin: 0; }
-        #wiki-sidebar li { padding: 4px 0; }
-        #wiki-sidebar img { max-width: 100%; height: auto; border-radius: 8px; margin: 10px auto; display: block; }
+        /* 左欄：專屬角色資訊框 */
+        #wiki-sidebar { 
+            flex: 0 0 350px; /* 絕對寬度，不准縮小也不准放大 */
+            background: #ffffff; 
+            border-radius: 12px; 
+            padding: 20px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
+            display: none; 
+            box-sizing: border-box;
+        }
+        /* 暴力洗掉 Wiki 資訊框的預設樣式 */
+        #wiki-sidebar .infobox, #wiki-sidebar table { width: 100% !important; margin: 0 !important; float: none !important; border-collapse: collapse; font-size: 14px; }
+        #wiki-sidebar th { background-color: #f1f5f9; padding: 10px; border-bottom: 2px solid #cbd5e1; font-weight: bold; border-radius: 4px; }
+        #wiki-sidebar td { padding: 10px 5px; border-bottom: 1px dashed #e2e8f0; }
+        #wiki-sidebar ul { list-style: none !important; padding: 0 !important; margin: 0 !important; }
+        #wiki-sidebar img { max-width: 100%; height: auto; border-radius: 8px; margin: 10px 0; }
         
-        /* 💡 右欄：主內容區 */
-        #wiki-content { flex: 1; min-width: 0; background: #ffffff; border-radius: 16px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.06); display: none; line-height: 1.8; font-size: 16px; }
+        /* 右欄：主內容區 */
+        #wiki-content { 
+            flex: 1 1 0; /* 佔滿剩餘空間，防止被內部大表格撐破 */
+            background: #ffffff; 
+            border-radius: 12px; 
+            padding: 40px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
+            display: none; 
+            line-height: 1.8; 
+            font-size: 16px; 
+            overflow-x: auto; /* 如果表格太大就出現捲軸，不准把雙欄撐破 */
+            box-sizing: border-box;
+        }
         
-        /* === 🔓 強制展開所有隱藏內容 (終極解藥) === */
-        /* 破解所有 Wiki 隱藏標籤，保證圖片與內文全部現形 */
-        .tab-pane, .tabbertab, .huiji-tab-content, .mw-collapsible-content, .pi-data, .pi-item {
-            display: block !important; opacity: 1 !important; visibility: visible !important;
-            height: auto !important; max-height: none !important; overflow: visible !important;
-            padding: 10px 0 !important;
+        /* 強制顯示所有原本被折疊的內容 */
+        .tab-pane, .tabbertab, .mw-collapsible-content, div[class*="tab-content"] {
+            display: block !important; opacity: 1 !important; visibility: visible !important; height: auto !important; padding: 15px 0 !important; border-top: 2px dashed #e2e8f0; margin-top: 20px;
         }
 
-        /* === 🎨 主內容區細部排版 === */
-        #wiki-content table.wikitable { width: 100%; border-collapse: collapse; margin: 25px 0; border-radius: 8px; overflow: hidden; box-shadow: 0 0 0 1px #e2e8f0; }
-        #wiki-content table.wikitable th { background-color: #f8fafc; padding: 12px; border: 1px solid #cbd5e1; color: #0f172a; }
-        #wiki-content table.wikitable td { padding: 12px; border: 1px solid #e2e8f0; }
+        /* 畫廊美化 */
+        ul.gallery { display: flex; flex-wrap: wrap; gap: 15px; padding: 0; margin: 20px 0; list-style: none; }
+        li.gallerybox { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; width: 160px; text-align: center; }
+        li.gallerybox img { max-width: 100%; cursor: zoom-in; border-radius: 4px; }
         
-        /* 畫廊 (橫向排列) */
-        ul.gallery { display: flex; flex-wrap: wrap; gap: 20px; padding: 0; margin: 25px 0; list-style: none; }
-        li.gallerybox { margin: 0; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; transition: 0.3s; width: 170px; text-align: center; display: flex; flex-direction: column; justify-content: space-between; }
-        li.gallerybox:hover { transform: translateY(-4px); box-shadow: 0 12px 20px rgba(0,0,0,0.08); border-color: #cbd5e1; }
-        li.gallerybox img { max-width: 100%; height: auto; border-radius: 4px; cursor: zoom-in; margin: 0 auto; }
-        .gallerytext { font-size: 13px; color: #475569; margin-top: 12px; line-height: 1.5; font-weight: 500; }
+        table.wikitable { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        table.wikitable th, table.wikitable td { border: 1px solid #cbd5e1; padding: 10px; }
+        table.wikitable th { background: #f1f5f9; }
         
-        img { max-width: 100%; height: auto; cursor: zoom-in; }
-        .thumbinner { border: 1px solid #e2e8f0; padding: 10px; background: #f8fafc; border-radius: 8px; float: right; margin: 0 0 20px 25px; text-align: center; font-size: 13px; color: #64748b; }
-        .mw-parser-output::after { content: ""; display: table; clear: both; }
+        img { max-width: 100%; cursor: zoom-in; }
+        .thumbinner { border: 1px solid #e2e8f0; padding: 10px; background: #f8fafc; float: right; margin: 0 0 20px 20px; text-align: center; }
         
-        /* 隱藏無用編輯按鈕與目錄 */
-        .navbox, .mw-editsection, .noprint, .toc, .mw-empty-elt { display: none !important; }
-        a { color: #3b82f6; text-decoration: none; font-weight: 500; transition: 0.2s; }
-        a:hover { text-decoration: underline; color: #1d4ed8; }
-        
-        /* 底部閱讀完整條目按鈕 */
-        .read-more { display: block; margin-top: 50px; text-align: center; font-size: 16px; font-weight: bold; padding: 18px; background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 12px; color: #475569; transition: 0.3s; }
-        .read-more:hover { background: #e2e8f0; border-color: #94a3b8; color: #0f172a; text-decoration: none; }
+        /* 隱藏無用元素 */
+        .navbox, .mw-editsection, .noprint, .toc { display: none !important; }
+        a { color: #3b82f6; text-decoration: none; }
+        a:hover { text-decoration: underline; }
 
-        /* === 🔍 燈箱 (Lightbox) === */
-        #lightbox { display: none; position: fixed; z-index: 9999; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.92); backdrop-filter: blur(8px); align-items: center; justify-content: center; flex-direction: column; }
-        #lightbox img { max-width: 90%; max-height: 85vh; border-radius: 8px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); object-fit: contain; }
-        #lightbox-close { color: white; margin-top: 25px; padding: 10px 30px; font-size: 16px; font-weight: bold; background: rgba(255,255,255,0.15); border-radius: 30px; cursor: pointer; transition: 0.2s; border: 1px solid rgba(255,255,255,0.3); }
-        #lightbox-close:hover { background: rgba(255,255,255,0.25); transform: scale(1.05); }
+        /* 燈箱 */
+        #lightbox { display: none; position: fixed; z-index: 9999; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; flex-direction: column; }
+        #lightbox img { max-width: 90%; max-height: 85vh; border-radius: 8px; border: 3px solid #fff; }
+        #lightbox-close { color: white; margin-top: 20px; padding: 8px 25px; font-size: 16px; background: rgba(255,255,255,0.2); border-radius: 20px; cursor: pointer; }
+        #lightbox-close:hover { background: rgba(255,255,255,0.4); }
 
         /* 手機版自動變單欄 */
         @media (max-width: 900px) {
             #result-wrapper { flex-direction: column; }
-            #wiki-sidebar { flex: auto; width: 100%; box-sizing: border-box; }
+            #wiki-sidebar { flex: auto; width: 100%; }
         }
     </style>
 </head>
 <body>
 
-    <h1>🗡️ FF14 灰機 Wiki 現代化查詢</h1>
+    <h1>🗡️ FF14 灰機 Wiki 現代化查詢 <span class="version-tag">(v3.0 淨化版)</span></h1>
     
     <div class="search-container">
         <input type="text" id="searchInput" placeholder="請輸入關鍵字（例如：塔塔露...）" value="塔塔露">
@@ -121,26 +131,13 @@
                     const keyword = document.getElementById('searchInput').value.trim();
                     if (keyword) fetchWikiData(keyword, s2tConverter, t2sConverter);
                 });
-
                 document.getElementById('searchInput').addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') document.getElementById('searchBtn').click();
                 });
             } catch (error) {
-                showError("OpenCC 載入失敗，請確認網路或重新整理。");
+                document.getElementById('status-msg').innerHTML = `<div class="error">OpenCC 載入失敗。</div>`;
             }
         };
-
-        function showLoading(msg) {
-            document.getElementById('status-msg').innerHTML = `<div class="loading">${msg}</div>`;
-            document.getElementById('wiki-sidebar').style.display = 'none';
-            document.getElementById('wiki-content').style.display = 'none';
-        }
-
-        function showError(msg) {
-            document.getElementById('status-msg').innerHTML = `<div class="error">${msg}</div>`;
-            document.getElementById('wiki-sidebar').style.display = 'none';
-            document.getElementById('wiki-content').style.display = 'none';
-        }
 
         function fetchJsonp(url) {
             return new Promise((resolve, reject) => {
@@ -159,7 +156,9 @@
 
         async function fetchWikiData(keyword, s2tConverter, t2sConverter) {
             const searchKeyword = t2sConverter(keyword);
-            showLoading("正在解析並重構雙欄儀表板...");
+            document.getElementById('status-msg').innerHTML = `<div class="loading">正在物理粉碎垃圾代碼...</div>`;
+            document.getElementById('wiki-sidebar').style.display = 'none';
+            document.getElementById('wiki-content').style.display = 'none';
 
             const baseUrl = "https://ff14.huijiwiki.com/api.php";
             const params = new URLSearchParams({
@@ -174,20 +173,14 @@
                 const data = await fetchJsonp(`${baseUrl}?${params.toString()}`);
 
                 if (data.error) {
-                    showError(`找不到關於「${keyword}」的資訊。`);
+                    document.getElementById('status-msg').innerHTML = `<div class="error">找不到關於「${keyword}」的資訊。</div>`;
                     return;
                 }
 
-                // 建立虛擬 DOM
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(data.parse.text['*'], 'text/html');
 
-                // 移除隱藏屬性 (確保相關資訊絕對現身)
-                doc.querySelectorAll('.hide, .fade, .collapse').forEach(el => {
-                    el.classList.remove('hide', 'fade', 'collapse');
-                });
-
-                // 修復圖片與防止跳轉
+                // 🔧 圖片修復與防止跳轉
                 doc.querySelectorAll('img').forEach(img => {
                     let realSrc = img.getAttribute('data-src') || img.getAttribute('data-lazy-src') || img.getAttribute('src');
                     if (realSrc) {
@@ -206,6 +199,26 @@
                     }
                 });
 
+                // 🧹 終極真空吸塵器：無情粉碎所有的頁籤按鈕與空白點點
+                
+                // 1. 砍掉所有擔任「按鈕」的標籤
+                doc.querySelectorAll('ul[class*="nav"], ul[class*="tab"], div[class*="nav"], .tabbernav').forEach(el => el.remove());
+                
+                // 2. 砍掉所有裡面「沒有文字也沒有圖片」的空殼 (包含 li, tr, p)
+                doc.querySelectorAll('li, tr, p').forEach(el => {
+                    // 把裡面所有的空白、換行全部消除後來計算長度，如果是 0 就代表裡面沒字！
+                    let cleanText = (el.textContent || '').replace(/\s/g, '');
+                    if (cleanText.length === 0 && !el.querySelector('img')) {
+                        el.remove(); // 直接物理刪除這個空殼
+                    }
+                });
+
+                // 3. 剝奪原網站所有強制設定的寬度 (防止撐破我們的雙欄)
+                doc.querySelectorAll('*').forEach(el => {
+                    if(el.style.width) el.style.width = '';
+                    if(el.style.minWidth) el.style.minWidth = '';
+                });
+
                 // 繁體翻譯
                 function translateTextNodes(node) {
                     if (node.nodeType === 3) node.nodeValue = s2tConverter(node.nodeValue);
@@ -216,42 +229,32 @@
                 const rootNode = doc.querySelector('.mw-parser-output') || doc.body;
                 translateTextNodes(rootNode);
 
-                // ⭐️ 核心重構：DOM 物理搬移術 (真正的分離左右欄) ⭐️
+                // ⭐️ 真正的左右分離手術
                 document.getElementById('status-msg').innerHTML = ''; 
                 
                 const sidebarDiv = document.getElementById('wiki-sidebar');
                 const contentDiv = document.getElementById('wiki-content');
-                sidebarDiv.innerHTML = '';
-                contentDiv.innerHTML = '';
+                sidebarDiv.innerHTML = ''; contentDiv.innerHTML = '';
 
-                // 找出所有的資訊框，把它「搬」進左邊的側邊欄
-                const infoboxes = rootNode.querySelectorAll('.infobox, .portable-infobox, table.infobox');
+                // 把資訊框移入左欄
+                const infoboxes = rootNode.querySelectorAll('.infobox, .portable-infobox, table[class*="infobox"]');
                 if (infoboxes.length > 0) {
-                    infoboxes.forEach(box => sidebarDiv.appendChild(box)); // 完美轉移，保留結構
+                    infoboxes.forEach(box => sidebarDiv.appendChild(box));
                     sidebarDiv.style.display = 'block';
                 } else {
                     sidebarDiv.style.display = 'none'; 
                 }
 
-                // 把剩餘的內文「搬」進右邊的主內容區
-                const wikiUrl = `https://ff14.huijiwiki.com/wiki/${encodeURIComponent(data.parse.title)}`;
-                const readMoreBtn = document.createElement('a');
-                readMoreBtn.href = wikiUrl;
-                readMoreBtn.target = '_blank';
-                readMoreBtn.className = 'read-more';
-                readMoreBtn.innerHTML = '🔗 前往原站閱讀完整條目';
-
+                // 把剩下乾淨的主內容放入右欄
                 contentDiv.appendChild(rootNode);
-                contentDiv.appendChild(readMoreBtn);
                 contentDiv.style.display = 'block';
 
             } catch (error) {
-                console.error(error);
-                showError(`資料重構失敗：${error.message}`);
+                document.getElementById('status-msg').innerHTML = `<div class="error">資料重構失敗：${error.message}</div>`;
             }
         }
 
-        // 💡 燈箱控制機制
+        // 燈箱控制
         document.body.addEventListener('click', function(e) {
             if (e.target.tagName === 'IMG' && e.target.id !== 'lightbox-img') {
                 e.preventDefault(); e.stopPropagation();
