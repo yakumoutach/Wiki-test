@@ -10,18 +10,18 @@
         /* === 🌐 基礎設定 === */
         body { font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif; background-color: #f3f4f6; color: #1f2937; max-width: 1200px; margin: 30px auto; padding: 20px; }
         h1 { text-align: center; color: #111827; margin-bottom: 20px; font-weight: 800; letter-spacing: 1px; }
-        .version-tag { font-size: 14px; color: #4f46e5; font-weight: bold; vertical-align: middle; background: #e0e7ff; padding: 4px 8px; border-radius: 8px; }
+        .version-tag { font-size: 14px; color: #16a34a; font-weight: bold; vertical-align: middle; background: #dcfce7; padding: 4px 8px; border-radius: 8px; border: 1px solid #86efac; }
         
-        /* === 🔍 搜尋列 (改名避開廣告阻擋器) === */
+        /* === 🔍 搜尋列 === */
         .find-panel { display: flex; gap: 10px; margin-bottom: 30px; justify-content: center; }
         #findInput { width: 100%; max-width: 500px; padding: 14px 20px; font-size: 16px; border: 2px solid #d1d5db; border-radius: 30px; outline: none; transition: 0.3s; }
         #findInput:focus { border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79,70,229,0.2); }
         #findBtn { padding: 14px 30px; font-size: 16px; background: #4f46e5; color: white; border: none; border-radius: 30px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        #findBtn:hover { background: #4338ca; }
+        #findBtn:hover { background: #4338ca; transform: translateY(-2px); }
 
         .loading, .error, .warning { background: white; padding: 20px; border-radius: 12px; text-align: center; font-weight: bold; font-size: 16px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .loading { color: #4f46e5; }
-        .error { color: #ef4444; }
+        .loading { color: #4f46e5; border-left: 4px solid #4f46e5; }
+        .error { color: #ef4444; border-left: 4px solid #ef4444; }
 
         /* =========================================
            ⭐️ 完美對應「附圖三」架構的儀表板 ⭐️
@@ -95,11 +95,11 @@
 </head>
 <body>
 
-    <h1>🗡️ FF14 角色資訊面板 <span class="version-tag">(v8.1 搜尋回歸與完美解析版)</span></h1>
+    <h1>🗡️ FF14 角色資訊面板 <span class="version-tag">(v9.0 究極防卡死版)</span></h1>
     
     <div class="find-panel">
         <input type="text" id="findInput" placeholder="請輸入關鍵字（例如：塔塔露...）" value="塔塔露">
-        <button id="findBtn" onclick="startSearch()">搜尋角色</button>
+        <button id="findBtn">搜尋角色</button>
     </div>
 
     <div id="status-msg"></div>
@@ -121,94 +121,347 @@
         <div id="lightbox-close">✖ 點擊關閉</div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js" async></script>
+    <script src="https://unpkg.com/opencc-js@1.0.5/dist/umd/full.js"></script>
 
     <script>
-        let characterImages = [];
-
-        window.onload = function() {
-            document.getElementById('findInput').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') startSearch();
-            });
-        };
-
-        function fetchJsonp(url) {
-            return new Promise((resolve, reject) => {
-                const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
-                window[callbackName] = function(data) {
-                    delete window[callbackName];
-                    document.body.removeChild(script);
-                    resolve(data);
-                };
-                const script = document.createElement('script');
-                script.src = url + '&callback=' + callbackName;
-                script.onerror = () => reject(new Error('伺服器連線超時'));
-                document.body.appendChild(script);
-            });
-        }
-
-        async function startSearch() {
+        // ⭐️ 核心防禦：確保網頁元素都準備好後，才強制綁定按鈕
+        document.addEventListener('DOMContentLoaded', () => {
+            const btn = document.getElementById('findBtn');
+            const input = document.getElementById('findInput');
             const statusMsg = document.getElementById('status-msg');
-            const keyword = document.getElementById('findInput').value.trim();
-            if (!keyword) return;
+            let characterImages = [];
 
-            statusMsg.innerHTML = `<div class="loading">🚀 正在前往以太之光擷取資料...</div>`;
-            document.getElementById('custom-dashboard').style.display = 'none';
-            document.getElementById('wiki-content').style.display = 'none';
-
-            try {
-                let s2tConverter = (text) => text;
-                let t2sConverter = (text) => text;
-
-                if (typeof OpenCC !== 'undefined') {
-                    s2tConverter = OpenCC.Converter({ from: 'cn', to: 'tw' });
-                    t2sConverter = OpenCC.Converter({ from: 'tw', to: 'cn' });
-                } else {
-                    statusMsg.innerHTML += `<div class="warning" style="font-size:14px; margin-top:10px;">⚠️ 繁簡轉換器載入異常，將以簡體顯示。</div>`;
-                }
-
-                await buildCustomDashboard(keyword, s2tConverter, t2sConverter, statusMsg);
-
-            } catch (err) {
-                statusMsg.innerHTML = `<div class="error">系統錯誤：${err.message}</div>`;
-            }
-        }
-
-        async function buildCustomDashboard(keyword, s2tConverter, t2sConverter, statusMsg) {
-            const searchKeyword = t2sConverter(keyword);
-            statusMsg.innerHTML = `<div class="loading">🔨 資料取得成功，正在組裝客製化面板...</div>`;
-
-            const baseUrl = "https://ff14.huijiwiki.com/api.php";
-            const params = new URLSearchParams({
-                action: "parse",
-                format: "json",
-                page: searchKeyword,
-                redirects: "1",
-                prop: "text"
+            // 強制綁定點擊與 Enter 鍵
+            btn.addEventListener('click', triggerSearch);
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') triggerSearch();
             });
 
-            const data = await fetchJsonp(`${baseUrl}?${params.toString()}`);
+            // 觸發搜尋的主流程
+            function triggerSearch() {
+                try {
+                    const keyword = input.value.trim();
+                    if (!keyword) {
+                        statusMsg.innerHTML = `<div class="warning">⚠️ 請輸入要搜尋的角色名稱！</div>`;
+                        return;
+                    }
+                    // 按下按鈕，畫面立刻給予反應！
+                    statusMsg.innerHTML = `<div class="loading">🟢 系統啟動，正在鎖定目標「${keyword}」...</div>`;
+                    document.getElementById('custom-dashboard').style.display = 'none';
+                    document.getElementById('wiki-content').style.display = 'none';
 
-            if (data.error) {
-                statusMsg.innerHTML = `<div class="error">找不到關於「${keyword}」的資訊。</div>`;
-                return;
+                    // 啟動非同步抓取
+                    executeDashboardBuild(keyword);
+                } catch (err) {
+                    statusMsg.innerHTML = `<div class="error">💥 啟動失敗：${err.message}</div>`;
+                }
             }
 
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(data.parse.text['*'], 'text/html');
+            // 帶有「逾時保護」的 JSONP 魔法
+            function fetchJsonp(url, timeout = 10000) {
+                return new Promise((resolve, reject) => {
+                    const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
+                    let script = document.createElement('script');
+                    
+                    // 10秒防卡死計時器
+                    const timer = setTimeout(() => {
+                        cleanup();
+                        reject(new Error('伺服器連線逾時，灰機 Wiki 無回應'));
+                    }, timeout);
 
-            // ⚠️ 剝除圖片外層的超連結，保證絕不跳轉！
-            doc.querySelectorAll('a').forEach(a => {
-                const img = a.querySelector('img');
-                if (img) {
-                    a.parentNode.insertBefore(img, a); 
-                    a.remove(); 
-                } else {
-                    let href = a.getAttribute('href');
-                    if (href && href.startsWith('/')) a.setAttribute('href', 'https://ff14.huijiwiki.com' + href);
-                    a.setAttribute('target', '_blank');
+                    function cleanup() {
+                        if (script.parentNode) document.body.removeChild(script);
+                        delete window[callbackName];
+                        clearTimeout(timer);
+                    }
+
+                    window[callbackName] = function(data) {
+                        cleanup();
+                        resolve(data);
+                    };
+
+                    script.src = url + '&callback=' + callbackName;
+                    script.onerror = () => {
+                        cleanup();
+                        reject(new Error('連線被瀏覽器阻擋或網路異常'));
+                    };
+                    document.body.appendChild(script);
+                });
+            }
+
+            async function executeDashboardBuild(keyword) {
+                try {
+                    // 安全初始化翻譯器
+                    let s2tConverter = (text) => text;
+                    let t2sConverter = (text) => text;
+
+                    if (window.OpenCC && typeof window.OpenCC.Converter === 'function') {
+                        s2tConverter = window.OpenCC.Converter({ from: 'cn', to: 'tw' });
+                        t2sConverter = window.OpenCC.Converter({ from: 'tw', to: 'cn' });
+                    } else {
+                        statusMsg.innerHTML += `<div class="warning" style="font-size:14px; margin-top:10px;">⚠️ 繁簡轉換器載入異常，將以簡體顯示。</div>`;
+                    }
+
+                    const searchKeyword = t2sConverter(keyword);
+                    statusMsg.innerHTML = `<div class="loading">🚀 正在連接以太之光抓取資料...</div>`;
+
+                    const baseUrl = "https://ff14.huijiwiki.com/api.php";
+                    const params = new URLSearchParams({
+                        action: "parse",
+                        format: "json",
+                        page: searchKeyword,
+                        redirects: "1",
+                        prop: "text"
+                    });
+
+                    // 執行抓取
+                    const data = await fetchJsonp(`${baseUrl}?${params.toString()}`);
+
+                    if (data.error) {
+                        statusMsg.innerHTML = `<div class="error">找不到關於「${keyword}」的資訊。</div>`;
+                        return;
+                    }
+
+                    statusMsg.innerHTML = `<div class="loading">🔨 資料取得成功，正在組裝客製化面板...</div>`;
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(data.parse.text['*'], 'text/html');
+
+                    // ⚠️ 物理超渡 2.0：絕對剝除所有圖片外層的超連結，保證絕不跳轉原網站！
+                    doc.querySelectorAll('a').forEach(a => {
+                        const img = a.querySelector('img');
+                        if (img) {
+                            a.parentNode.insertBefore(img, a); 
+                            a.remove(); 
+                        } else {
+                            let href = a.getAttribute('href');
+                            if (href && href.startsWith('/')) a.setAttribute('href', 'https://ff14.huijiwiki.com' + href);
+                            a.setAttribute('target', '_blank');
+                        }
+                    });
+
+                    // 砍掉無用編輯按鈕，避免干擾抓取
+                    doc.querySelectorAll('.mw-editsection, .noprint, style, script').forEach(e => e.remove());
+
+                    const infobox = doc.querySelector('.infobox, .portable-infobox, table[class*="infobox"]');
+                    
+                    if (infobox) {
+                        // === 1. 抽取照片與按鈕 ===
+                        characterImages = [];
+                        const addedUrls = new Set(); 
+
+                        infobox.querySelectorAll('img').forEach(img => {
+                            let src = img.getAttribute('data-src') || img.getAttribute('data-lazy-src') || img.getAttribute('src');
+                            if (!src || src.includes('16px') || src.includes('20px')) return; 
+
+                            if (src.startsWith('//')) src = 'https:' + src;
+                            else if (src.startsWith('/')) src = 'https://ff14.huijiwiki.com' + src;
+                            
+                            if (src.includes('/thumb/')) {
+                                src = src.replace('/thumb/', '/');
+                                src = src.substring(0, src.lastIndexOf('/'));
+                            }
+
+                            if(addedUrls.has(src)) return;
+                            addedUrls.add(src);
+
+                            let label = "外觀預覽";
+                            let tabPane = img.closest('.tab-pane, .tabbertab, .pi-image-collection-tab-content');
+                            if (tabPane) {
+                                label = tabPane.getAttribute('title') || tabPane.getAttribute('data-title') || label;
+                                let ref = tabPane.getAttribute('data-ref');
+                                if (ref) {
+                                    let navLi = infobox.querySelector(`.pi-image-collection-tabs li[data-ref="${ref}"]`);
+                                    if (navLi) label = navLi.textContent.trim();
+                                }
+                            } else if (img.getAttribute('alt') && img.getAttribute('alt').length < 15) {
+                                label = img.getAttribute('alt');
+                            }
+
+                            characterImages.push({ url: src, label: label });
+                        });
+
+                        if (characterImages.length === 0) characterImages.push({ url: 'https://via.placeholder.com/350x450?text=無圖片', label: '預設' });
+
+                        // === 2. ⭐️ 全新解體魔法：將清單轉化為逐列排版 ⭐️ ===
+                        let rightPanelHtml = '';
+                        const mainTabs = infobox.querySelectorAll('.huiji-tab-content > .tab-pane, .pi-theme-default > .tabber > .tabbertab');
+
+                        function extractRows(container) {
+                            let html = '';
+                            
+                            // Fandom 表格版型
+                            if (container.querySelector('.pi-data')) {
+                                container.querySelectorAll('.pi-header, .pi-data').forEach(node => {
+                                    if (node.classList.contains('pi-header')) {
+                                        html += `<div class="dash-group-title">${node.innerHTML}</div>`;
+                                    } else if (node.classList.contains('pi-data')) {
+                                        let lbl = node.querySelector('.pi-data-label');
+                                        let val = node.querySelector('.pi-data-value');
+                                        if (lbl && val) html += `<div class="dash-row"><div class="dash-lbl">${lbl.innerHTML}</div><div class="dash-val">${val.innerHTML}</div></div>`;
+                                        else if (val) html += `<div class="dash-row"><div class="dash-val">${val.innerHTML}</div></div>`;
+                                    }
+                                });
+                                return html;
+                            }
+
+                            // 傳統表格版型
+                            const rows = container.querySelectorAll('tr');
+                            if (rows.length > 0) {
+                                rows.forEach(tr => {
+                                    let th = tr.querySelector('th');
+                                    let td = tr.querySelector('td');
+                                    if (th && td) html += `<div class="dash-row"><div class="dash-lbl">${th.innerHTML}</div><div class="dash-val">${td.innerHTML}</div></div>`;
+                                    else if (th && !td) html += `<div class="dash-group-title">${th.innerHTML}</div>`;
+                                });
+                            }
+
+                            // ⭐️ 處理「帶黑點點的清單」進行冒號解體 ⭐️
+                            const lists = container.querySelectorAll('li');
+                            let hasListPills = false;
+                            let pillHtml = '<div class="pill-container">';
+                            
+                            lists.forEach(li => {
+                                let rawText = li.textContent.replace(/[\s\xA0\u200B]/g, '');
+                                if (rawText === '' && !li.querySelector('img')) return; 
+
+                                if (li.innerHTML.includes('：')) {
+                                    let parts = li.innerHTML.split('：');
+                                    let lbl = parts.shift();
+                                    let val = parts.join('：');
+                                    html += `<div class="dash-row"><div class="dash-lbl">${lbl}</div><div class="dash-val">${val}</div></div>`;
+                                } else if (li.innerHTML.includes(':') && !li.innerHTML.includes('http')) {
+                                    let parts = li.innerHTML.split(':');
+                                    let lbl = parts.shift();
+                                    let val = parts.join(':');
+                                    html += `<div class="dash-row"><div class="dash-lbl">${lbl}</div><div class="dash-val">${val}</div></div>`;
+                                } else {
+                                    hasListPills = true;
+                                    pillHtml += `<span class="dash-pill">${li.innerHTML}</span>`;
+                                }
+                            });
+                            pillHtml += '</div>';
+                            if (hasListPills) html += pillHtml;
+
+                            if (html === '') {
+                                container.querySelectorAll('p').forEach(p => {
+                                    if(p.textContent.trim()) html += `<div class="dash-row"><div class="dash-val">${p.innerHTML}</div></div>`;
+                                });
+                            }
+
+                            return html;
+                        }
+
+                        if (mainTabs.length > 0) {
+                            mainTabs.forEach(tab => {
+                                let tabTitle = tab.getAttribute('title') || tab.getAttribute('data-title') || '資料';
+                                rightPanelHtml += `<div class="dash-section-title">${tabTitle}</div>`;
+                                rightPanelHtml += extractRows(tab);
+                            });
+                        } else {
+                            rightPanelHtml += `<div class="dash-section-title">角色與相關信息</div>`;
+                            rightPanelHtml += extractRows(infobox);
+                        }
+
+                        document.getElementById('dash-right').innerHTML = s2tConverter(rightPanelHtml) || '<div class="dash-row">無詳細資料</div>';
+                        
+                        const controlsContainer = document.getElementById('dash-img-controls');
+                        controlsContainer.innerHTML = '';
+                        characterImages.forEach((imgObj, index) => {
+                            let btn = document.createElement('button');
+                            btn.className = `img-btn ${index === 0 ? 'active' : ''}`;
+                            btn.innerText = s2tConverter(imgObj.label);
+                            btn.onclick = () => changeDashboardImage(index, btn);
+                            controlsContainer.appendChild(btn);
+                        });
+
+                        changeDashboardImage(0, controlsContainer.firstChild);
+
+                        infobox.remove(); 
+                        document.getElementById('custom-dashboard').style.display = 'flex';
+                    }
+
+                    // === 3. 處理下方文章 ===
+                    doc.querySelectorAll('ul[class*="nav"], div[class*="nav"], .tabbernav').forEach(el => el.remove());
+                    doc.querySelectorAll('.tab-pane, .tabbertab').forEach(el => {
+                        el.style.display = 'block'; el.style.opacity = '1'; el.style.visibility = 'visible'; el.style.height = 'auto';
+                    });
+                    
+                    doc.querySelectorAll('img').forEach(img => {
+                        let src = img.getAttribute('data-src') || img.getAttribute('src');
+                        if (src) {
+                            if (src.startsWith('//')) src = 'https:' + src;
+                            else if (src.startsWith('/')) src = 'https://ff14.huijiwiki.com' + src;
+                            img.setAttribute('src', src);
+                        }
+                        img.removeAttribute('data-src'); img.removeAttribute('srcset'); img.classList.remove('lazyload');
+                        img.style.cursor = 'zoom-in';
+                    });
+
+                    function translateTextNodes(node) {
+                        if (node.nodeType === 3) node.nodeValue = s2tConverter(node.nodeValue);
+                        else if (node.nodeType === 1 && node.nodeName !== 'SCRIPT' && node.nodeName !== 'STYLE') {
+                            node.childNodes.forEach(child => translateTextNodes(child));
+                        }
+                    }
+                    const rootNode = doc.querySelector('.mw-parser-output') || doc.body;
+                    translateTextNodes(rootNode);
+
+                    document.getElementById('status-msg').innerHTML = '';
+                    
+                    const wikiUrl = `https://ff14.huijiwiki.com/wiki/${encodeURIComponent(data.parse.title)}`;
+                    const readMoreBtn = `<a href="${wikiUrl}" target="_blank" class="read-more">🔗 前往灰機 Wiki 閱讀完整條目</a>`;
+                    
+                    const contentDiv = document.getElementById('wiki-content');
+                    contentDiv.innerHTML = `<div class="dash-section-title" style="margin-top:0;">人物詳細資料</div>` + rootNode.innerHTML + readMoreBtn;
+                    contentDiv.style.display = 'block';
+
+                } catch (error) {
+                    statusMsg.innerHTML = `<div class="error">發生未預期的錯誤：${error.message}</div>`;
                 }
-            });
+            }
 
-            // 砍掉無用編輯按鈕，避免干擾抓取
-            doc.querySelectorAll('.mw
+            window.changeDashboardImage = function(index, btnElement) {
+                const imgEl = document.getElementById('dash-main-img');
+                const targetUrl = characterImages[index].url;
+                
+                imgEl.style.opacity = '0';
+                setTimeout(() => {
+                    imgEl.src = targetUrl;
+                    imgEl.onerror = () => { imgEl.src = 'https://via.placeholder.com/350x450?text=無高畫質圖片'; };
+                    imgEl.onload = () => { imgEl.style.opacity = '1'; };
+                }, 150);
+
+                if(btnElement) {
+                    document.querySelectorAll('.img-btn').forEach(b => b.classList.remove('active'));
+                    btnElement.classList.add('active');
+                }
+            };
+
+            // 💡 全局燈箱攔截系統
+            document.addEventListener('click', function(e) {
+                if (e.target.tagName === 'IMG' && e.target.id !== 'lightbox-img') {
+                    e.preventDefault(); 
+                    e.stopPropagation();
+                    
+                    let src = e.target.src;
+                    if (!src || src.includes('placeholder')) return;
+
+                    if (src.includes('/thumb/')) {
+                        src = src.replace('/thumb/', '/');
+                        src = src.substring(0, src.lastIndexOf('/'));
+                    }
+                    
+                    const lightboxImg = document.getElementById('lightbox-img');
+                    lightboxImg.onerror = function() { this.onerror = null; this.src = e.target.src; };
+                    lightboxImg.src = src;
+                    document.getElementById('lightbox').style.display = 'flex';
+                }
+            }, true); 
+
+            document.getElementById('lightbox').addEventListener('click', function() {
+                this.style.display = 'none';
+            });
+        });
+    </script>
+</body>
+</html>
