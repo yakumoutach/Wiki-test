@@ -39,8 +39,9 @@
         a:hover { text-decoration: underline; }
         .read-more { display: block; margin-top: 30px; text-align: center; font-size: 16px; font-weight: bold; padding: 10px; background: #eef; border-radius: 4px; }
 
-        /* 💡 圖片放大鏡 (Lightbox) 專屬樣式 💡 */
+        /* 💡 圖片放大鏡 (Lightbox) 專屬樣式 */
         #lightbox { display: none; position: fixed; z-index: 9999; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); align-items: center; justify-content: center; flex-direction: column; backdrop-filter: blur(5px); }
+        /* 讓圖片能盡可能放大，但不會超出螢幕 */
         #lightbox img { max-width: 90%; max-height: 85vh; box-shadow: 0 4px 20px rgba(0,0,0,0.6); border: 4px solid #fff; border-radius: 6px; object-fit: contain; }
         #lightbox-close { color: white; font-size: 20px; margin-top: 20px; cursor: pointer; font-weight: bold; background: rgba(255,255,255,0.2); padding: 8px 20px; border-radius: 20px; transition: 0.3s; }
         #lightbox-close:hover { background: rgba(255,255,255,0.4); }
@@ -100,7 +101,7 @@
             const resultDiv = document.getElementById('result');
             const searchKeyword = t2sConverter(keyword);
             
-            resultDiv.innerHTML = `<span class="loading">正在搬運資料並徹底銷毀圖片超連結...</span>`;
+            resultDiv.innerHTML = `<span class="loading">正在搬運資料並還原高清大圖...</span>`;
 
             const baseUrl = "https://ff14.huijiwiki.com/api.php";
             const params = new URLSearchParams({
@@ -124,7 +125,6 @@
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(htmlContent, 'text/html');
 
-                // 處理圖片路徑
                 doc.querySelectorAll('img').forEach(img => {
                     let realSrc = img.getAttribute('data-src') || img.getAttribute('data-lazy-src') || img.getAttribute('src');
                     if (realSrc) {
@@ -136,13 +136,10 @@
                     img.removeAttribute('srcset');
                 });
 
-                // ★ 物理超渡魔法：徹底銷毀包著圖片的 <a> 標籤 ★
                 doc.querySelectorAll('a').forEach(a => {
                     if (a.querySelector('img')) {
-                        // 直接把 <a> 標籤的「外殼」扒掉，只留下裡面的 <img>
                         a.outerHTML = a.innerHTML;
                     } else {
-                        // 一般的文字超連結正常處理
                         let href = a.getAttribute('href');
                         if (href && href.startsWith('/')) {
                             a.setAttribute('href', 'https://ff14.huijiwiki.com' + href);
@@ -151,7 +148,6 @@
                     }
                 });
 
-                // 安全翻譯
                 function translateTextNodes(node) {
                     if (node.nodeType === 3) { 
                         node.nodeValue = s2tConverter(node.nodeValue);
@@ -179,23 +175,30 @@
         }
 
         // 💡 燈箱全局控制邏輯 💡
-        // 直接監聽整個 result 區塊，只要點到圖片就觸發，絕對不會失誤！
         document.getElementById('result').addEventListener('click', function(e) {
-            // 如果你點擊的目標是一個 <img> 標籤
             if (e.target.tagName === 'IMG') {
                 e.preventDefault(); 
                 e.stopPropagation();
                 
+                let imgSrc = e.target.src;
+                
+                // ★ 神奇還原術：把縮圖路徑變回原圖網址 ★
+                // 檢查網址裡有沒有包含 /thumb/
+                if (imgSrc.includes('/thumb/')) {
+                    // 1. 把 /thumb/ 砍掉
+                    imgSrc = imgSrc.replace('/thumb/', '/');
+                    // 2. 把最後面跟解析度有關的後綴 (例如 /150px-xxx.png) 從最後一個斜線處截斷
+                    imgSrc = imgSrc.substring(0, imgSrc.lastIndexOf('/'));
+                }
+                
                 const lightbox = document.getElementById('lightbox');
                 const lightboxImg = document.getElementById('lightbox-img');
                 
-                // 強制抓取畫面上已經成功顯示的圖片網址，塞進燈箱裡
-                lightboxImg.src = e.target.src;
+                lightboxImg.src = imgSrc;
                 lightbox.style.display = 'flex';
             }
         });
 
-        // 點擊燈箱關閉
         document.getElementById('lightbox').addEventListener('click', function() {
             this.style.display = 'none';
             document.getElementById('lightbox-img').src = ''; 
