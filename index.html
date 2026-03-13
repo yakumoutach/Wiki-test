@@ -6,29 +6,35 @@
     <title>FF14 灰機 Wiki 快速查詢</title>
     <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; color: #333; max-width: 1000px; margin: 50px auto; padding: 20px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; color: #333; max-width: 1100px; margin: 50px auto; padding: 20px; }
         .search-container { display: flex; gap: 10px; margin-bottom: 20px; }
         input[type="text"] { flex-grow: 1; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; }
-        button { padding: 10px 20px; font-size: 16px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s; }
+        button { padding: 10px 20px; font-size: 16px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; transition: 0.3s; }
         button:hover { background-color: #45a049; }
-        #result { background-color: white; padding: 20px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); min-height: 100px; line-height: 1.6; overflow: hidden; }
+        #result { background-color: white; padding: 30px; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); min-height: 100px; line-height: 1.6; overflow: hidden; font-size: 15px; }
         .loading { color: #8a2be2; font-style: italic; font-weight: bold; }
         .error { color: #d32f2f; font-weight: bold; }
         
-        /* --- 以下是為了讓 Wiki 完整內容排版好看一點所加的基礎 CSS --- */
-        #result img { max-width: 100%; height: auto; }
-        #result table { border-collapse: collapse; width: 100%; margin-bottom: 20px; font-size: 14px; }
-        #result th, #result td { border: 1px solid #ddd; padding: 8px; }
-        #result th { background-color: #f2f2f2; }
-        /* 針對右側的人物資訊框 (Infobox) 設定 */
-        .infobox { float: right; width: 300px; background: #f9f9f9; border: 1px solid #aaa; padding: 10px; margin-left: 20px; margin-bottom: 20px; }
-        .infobox th { background-color: #e0e0e0; text-align: center; }
-        /* 隱藏 Wiki 原本的編輯按鈕與無用元素 */
-        .mw-editsection, .mw-empty-elt, .noprint { display: none !important; }
+        /* === Wiki 專屬 CSS 修復 === */
+        /* 1. 右側角色資訊框 (Infobox) */
+        .infobox { float: right; width: 320px; background: #f9f9f9; border: 1px solid #aaa; padding: 10px; margin: 0 0 15px 20px; clear: right; font-size: 13px; }
+        .infobox th { background-color: #e0e0e0; text-align: center; padding: 5px; }
+        .infobox td { padding: 5px; border-bottom: 1px solid #eee; }
+        /* 2. 一般表格 (Wikitable) */
+        table.wikitable { border-collapse: collapse; width: 100%; margin: 15px 0; }
+        table.wikitable th, table.wikitable td { border: 1px solid #a2a9b1; padding: 8px; }
+        table.wikitable th { background-color: #eaecf0; text-align: center; }
+        /* 3. 圖片與浮動元素修復 */
+        img { max-width: 100%; height: auto; border: none; }
+        .thumb { float: right; margin: 10px; border: 1px solid #ccc; padding: 5px; background: #fff; text-align: center; }
+        .thumbcaption { font-size: 12px; color: #666; margin-top: 5px; text-align: left; }
+        .mw-parser-output::after { content: ""; display: table; clear: both; } /* 清除浮動 */
+        /* 4. 隱藏不必要的 Wiki 導航與編輯按鈕 */
+        .navbox, .mw-editsection, .noprint, .toc { display: none !important; }
         ul { padding-left: 20px; }
         a { color: #0066cc; text-decoration: none; }
         a:hover { text-decoration: underline; }
-        .read-more { display: block; margin-top: 20px; text-align: center; font-size: 18px; font-weight: bold; }
+        .read-more { display: block; margin-top: 30px; text-align: center; font-size: 16px; font-weight: bold; padding: 10px; background: #eef; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -36,13 +42,11 @@
     <h1>🗡️ FF14 灰機 Wiki 快速查詢</h1>
     
     <div class="search-container">
-        <input type="text" id="searchInput" placeholder="請輸入關鍵字（例如：塔塔露、阿爾菲諾...）" value="塔塔露">
+        <input type="text" id="searchInput" placeholder="請輸入關鍵字（例如：塔塔露、拂曉血盟...）" value="塔塔露">
         <button id="searchBtn">搜尋</button>
     </div>
 
-    <div id="result">
-        在這裡顯示查詢結果...
-    </div>
+    <div id="result">在這裡顯示查詢結果...</div>
 
     <script>
         window.onload = function() {
@@ -59,11 +63,10 @@
                     if (e.key === 'Enter') document.getElementById('searchBtn').click();
                 });
             } catch (error) {
-                document.getElementById('result').innerHTML = `<span class="error">OpenCC 工具載入失敗。</span>`;
+                document.getElementById('result').innerHTML = `<span class="error">OpenCC 載入失敗。</span>`;
             }
         };
 
-        // JSONP 魔法函式
         function fetchJsonp(url) {
             return new Promise((resolve, reject) => {
                 const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
@@ -83,7 +86,7 @@
             const resultDiv = document.getElementById('result');
             const searchKeyword = t2sConverter(keyword);
             
-            resultDiv.innerHTML = `<span class="loading">正在搬運完整 Wiki 網頁資料...<br>(實際送出搜尋條目：${searchKeyword})</span>`;
+            resultDiv.innerHTML = `<span class="loading">正在搬運並修復 Wiki 網頁資料...</span>`;
 
             const baseUrl = "https://ff14.huijiwiki.com/api.php";
             const params = new URLSearchParams({
@@ -91,38 +94,70 @@
                 format: "json",
                 page: searchKeyword,
                 redirects: "1",
-                prop: "text" // 抓取完整 HTML 文本
+                prop: "text"
             });
 
             try {
                 const data = await fetchJsonp(`${baseUrl}?${params.toString()}`);
 
                 if (data.error) {
-                    resultDiv.innerHTML = `<span class="error">找不到關於「${keyword}」的資訊。請確認關鍵字是否完全正確。</span>`;
+                    resultDiv.innerHTML = `<span class="error">找不到關於「${keyword}」的資訊。</span>`;
                     return;
                 }
 
-                // 取得整頁的 HTML 原始碼
-                let htmlContent = data.parse.text['*'];
-                
-                // ★ 關鍵魔法：將相對路徑替換為絕對路徑，防止圖片和連結破圖 ★
-                // 將 src="/ 或 href="/ 或 srcset="/ 替換成加上灰機網址的完整路徑
-                htmlContent = htmlContent.replace(/(href|src|srcset)="\//g, '$1="https://ff14.huijiwiki.com/');
+                // 取得原始 HTML 字串
+                const htmlContent = data.parse.text['*'];
 
-                // 直接將整個修復好的 HTML 丟給 OpenCC 進行簡繁轉換
-                const traditionalHtml = s2tConverter(htmlContent);
+                // 建立一個虛擬的網頁環境 (DOM) 來進行精準修復
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlContent, 'text/html');
+
+                // 🔧 核心修復 1：處理圖片 Lazy Load 與相對路徑
+                doc.querySelectorAll('img').forEach(img => {
+                    // 抓出真正的圖片網址 (可能藏在 data-src 或 data-lazy-src 裡)
+                    let realSrc = img.getAttribute('data-src') || img.getAttribute('data-lazy-src') || img.getAttribute('src');
+                    if (realSrc) {
+                        if (realSrc.startsWith('//')) {
+                            img.src = 'https:' + realSrc; // 補全 // 開頭的網址
+                        } else if (realSrc.startsWith('/')) {
+                            img.src = 'https://ff14.huijiwiki.com' + realSrc; // 補全 / 開頭的網址
+                        } else {
+                            img.src = realSrc;
+                        }
+                    }
+                    // 移除多餘的延遲加載屬性，強迫瀏覽器立刻載入圖片
+                    img.removeAttribute('data-src');
+                    img.removeAttribute('srcset');
+                });
+
+                // 🔧 核心修復 2：修復超連結
+                doc.querySelectorAll('a').forEach(a => {
+                    let href = a.getAttribute('href');
+                    if (href) {
+                        if (href.startsWith('/')) {
+                            a.href = 'https://ff14.huijiwiki.com' + href;
+                        }
+                    }
+                    a.target = '_blank'; // 讓所有連結都在新分頁開啟
+                });
+
+                // 提取修復後的 HTML (只取有用的主內容區塊 mw-parser-output)
+                const rootNode = doc.querySelector('.mw-parser-output');
+                let cleanHtml = rootNode ? rootNode.innerHTML : doc.body.innerHTML;
+
+                // 進行簡轉繁
+                const traditionalHtml = s2tConverter(cleanHtml);
                 
-                // 產生前往原頁面的連結
                 const pageTitle = data.parse.title; 
                 const wikiUrl = `https://ff14.huijiwiki.com/wiki/${encodeURIComponent(pageTitle)}`;
                 const readMoreBtn = `<a href="${wikiUrl}" target="_blank" class="read-more">🔗 前往灰機 Wiki 閱讀原始條目</a>`;
 
-                // 渲染完整網頁內容
+                // 顯示結果
                 resultDiv.innerHTML = traditionalHtml + readMoreBtn;
 
             } catch (error) {
                 console.error("抓取失敗:", error);
-                resultDiv.innerHTML = `<span class="error">魔法發動失敗：${error.message}</span>`;
+                resultDiv.innerHTML = `<span class="error">資料搬運失敗：${error.message}</span>`;
             }
         }
     </script>
