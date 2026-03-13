@@ -17,18 +17,19 @@
         .loading { color: #8a2be2; font-style: italic; font-weight: bold; }
         .error { color: #d32f2f; font-weight: bold; }
         
-        /* === Wiki 專屬 CSS 終極修復 === */
         .infobox { float: right; width: 320px; background: #f9f9f9; border: 1px solid #aaa; padding: 10px; margin: 0 0 15px 20px; font-size: 13px; }
         .infobox th { background-color: #e0e0e0; text-align: center; padding: 5px; }
         .infobox td { padding: 5px; border-bottom: 1px solid #eee; }
         table.wikitable { border-collapse: collapse; width: 100%; margin: 15px 0; }
         table.wikitable th, table.wikitable td { border: 1px solid #a2a9b1; padding: 8px; }
         table.wikitable th { background-color: #eaecf0; text-align: center; }
+        
         ul.gallery { display: flex; flex-wrap: wrap; padding: 0; margin: 15px 0; list-style-type: none; justify-content: flex-start; }
         li.gallerybox { margin: 10px; text-align: center; width: auto !important; }
         li.gallerybox .thumb { border: 1px solid #ccc; background-color: #f9f9f9; padding: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         li.gallerybox img { display: block; margin: 0 auto; max-width: 150px; height: auto; cursor: zoom-in; }
         li.gallerybox .gallerytext { font-size: 13px; color: #555; padding-top: 8px; max-width: 150px; word-wrap: break-word; }
+        
         img { max-width: 100%; height: auto; border: none; cursor: zoom-in; }
         .thumbinner { border: 1px solid #ccc; padding: 5px; background: #f9f9f9; font-size: 13px; text-align: center; margin: 10px; float: right; }
         .mw-parser-output::after { content: ""; display: table; clear: both; }
@@ -99,7 +100,7 @@
             const resultDiv = document.getElementById('result');
             const searchKeyword = t2sConverter(keyword);
             
-            resultDiv.innerHTML = `<span class="loading">正在搬運並裝備放大鏡...</span>`;
+            resultDiv.innerHTML = `<span class="loading">正在搬運資料並徹底銷毀圖片超連結...</span>`;
 
             const baseUrl = "https://ff14.huijiwiki.com/api.php";
             const params = new URLSearchParams({
@@ -127,28 +128,26 @@
                 doc.querySelectorAll('img').forEach(img => {
                     let realSrc = img.getAttribute('data-src') || img.getAttribute('data-lazy-src') || img.getAttribute('src');
                     if (realSrc) {
-                        if (realSrc.startsWith('//')) img.src = 'https:' + realSrc;
-                        else if (realSrc.startsWith('/')) img.src = 'https://ff14.huijiwiki.com' + realSrc;
-                        else img.src = realSrc;
+                        if (realSrc.startsWith('//')) img.setAttribute('src', 'https:' + realSrc);
+                        else if (realSrc.startsWith('/')) img.setAttribute('src', 'https://ff14.huijiwiki.com' + realSrc);
+                        else img.setAttribute('src', realSrc);
                     }
                     img.removeAttribute('data-src');
                     img.removeAttribute('srcset');
                 });
 
-                // ★ 關鍵修復：沒收圖片的超連結，防止跳轉 ★
+                // ★ 物理超渡魔法：徹底銷毀包著圖片的 <a> 標籤 ★
                 doc.querySelectorAll('a').forEach(a => {
-                    // 如果這個超連結裡面包著圖片，直接刪除它的 href 屬性
                     if (a.querySelector('img')) {
-                        a.removeAttribute('href');
-                        a.removeAttribute('target');
-                        a.style.cursor = 'zoom-in';
+                        // 直接把 <a> 標籤的「外殼」扒掉，只留下裡面的 <img>
+                        a.outerHTML = a.innerHTML;
                     } else {
-                        // 如果只是一般的文字超連結，則補全網址並設定開新分頁
+                        // 一般的文字超連結正常處理
                         let href = a.getAttribute('href');
                         if (href && href.startsWith('/')) {
-                            a.href = 'https://ff14.huijiwiki.com' + href;
+                            a.setAttribute('href', 'https://ff14.huijiwiki.com' + href);
                         }
-                        a.target = '_blank';
+                        a.setAttribute('target', '_blank');
                     }
                 });
 
@@ -171,11 +170,7 @@
                 const wikiUrl = `https://ff14.huijiwiki.com/wiki/${encodeURIComponent(pageTitle)}`;
                 const readMoreBtn = `<a href="${wikiUrl}" target="_blank" class="read-more">🔗 前往灰機 Wiki 閱讀原始條目</a>`;
 
-                // 將內容放入網頁
                 resultDiv.innerHTML = finalHtml + readMoreBtn;
-
-                // 啟動燈箱魔法
-                setupLightbox();
 
             } catch (error) {
                 console.error("抓取失敗:", error);
@@ -183,27 +178,28 @@
             }
         }
 
-        // 💡 燈箱控制邏輯 💡
-        function setupLightbox() {
-            const lightbox = document.getElementById('lightbox');
-            const lightboxImg = document.getElementById('lightbox-img');
+        // 💡 燈箱全局控制邏輯 💡
+        // 直接監聽整個 result 區塊，只要點到圖片就觸發，絕對不會失誤！
+        document.getElementById('result').addEventListener('click', function(e) {
+            // 如果你點擊的目標是一個 <img> 標籤
+            if (e.target.tagName === 'IMG') {
+                e.preventDefault(); 
+                e.stopPropagation();
+                
+                const lightbox = document.getElementById('lightbox');
+                const lightboxImg = document.getElementById('lightbox-img');
+                
+                // 強制抓取畫面上已經成功顯示的圖片網址，塞進燈箱裡
+                lightboxImg.src = e.target.src;
+                lightbox.style.display = 'flex';
+            }
+        });
 
-            document.querySelectorAll('#result img').forEach(img => {
-                img.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    
-                    // ★ 關鍵修復：直接拿畫面上已經顯示成功的圖片網址，絕不破圖 ★
-                    lightboxImg.src = img.src;
-                    lightbox.style.display = 'flex';
-                });
-            });
-
-            lightbox.addEventListener('click', () => {
-                lightbox.style.display = 'none';
-                lightboxImg.src = ''; 
-            });
-        }
+        // 點擊燈箱關閉
+        document.getElementById('lightbox').addEventListener('click', function() {
+            this.style.display = 'none';
+            document.getElementById('lightbox-img').src = ''; 
+        });
     </script>
 
 </body>
