@@ -123,4 +123,90 @@
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(htmlContent, 'text/html');
 
-                doc
+                doc.querySelectorAll('img').forEach(img => {
+                    let realSrc = img.getAttribute('data-src') || img.getAttribute('data-lazy-src') || img.getAttribute('src');
+                    if (realSrc) {
+                        if (realSrc.startsWith('//')) img.setAttribute('src', 'https:' + realSrc);
+                        else if (realSrc.startsWith('/')) img.setAttribute('src', 'https://ff14.huijiwiki.com' + realSrc);
+                        else img.setAttribute('src', realSrc);
+                    }
+                    img.removeAttribute('data-src');
+                    img.removeAttribute('srcset');
+                });
+
+                doc.querySelectorAll('a').forEach(a => {
+                    if (a.querySelector('img')) {
+                        a.outerHTML = a.innerHTML;
+                    } else {
+                        let href = a.getAttribute('href');
+                        if (href && href.startsWith('/')) {
+                            a.setAttribute('href', 'https://ff14.huijiwiki.com' + href);
+                        }
+                        a.setAttribute('target', '_blank');
+                    }
+                });
+
+                function translateTextNodes(node) {
+                    if (node.nodeType === 3) { 
+                        node.nodeValue = s2tConverter(node.nodeValue);
+                    } else if (node.nodeType === 1) { 
+                        if (node.nodeName !== 'SCRIPT' && node.nodeName !== 'STYLE') {
+                            node.childNodes.forEach(child => translateTextNodes(child));
+                        }
+                    }
+                }
+                translateTextNodes(doc.body);
+
+                const rootNode = doc.querySelector('.mw-parser-output');
+                let finalHtml = rootNode ? rootNode.innerHTML : doc.body.innerHTML;
+                
+                const pageTitle = data.parse.title; 
+                const wikiUrl = `https://ff14.huijiwiki.com/wiki/${encodeURIComponent(pageTitle)}`;
+                const readMoreBtn = `<a href="${wikiUrl}" target="_blank" class="read-more">🔗 前往灰機 Wiki 閱讀原始條目</a>`;
+
+                resultDiv.innerHTML = finalHtml + readMoreBtn;
+
+            } catch (error) {
+                console.error("抓取失敗:", error);
+                resultDiv.innerHTML = `<span class="error">資料搬運失敗：${error.message}</span>`;
+            }
+        }
+
+        // 💡 燈箱全局控制邏輯與保險機制 💡
+        document.getElementById('result').addEventListener('click', function(e) {
+            if (e.target.tagName === 'IMG') {
+                e.preventDefault(); 
+                e.stopPropagation();
+                
+                const thumbSrc = e.target.src; // 畫面上已經成功顯示的小圖
+                let hdSrc = thumbSrc;          // 準備推算的高清圖
+                
+                if (hdSrc.includes('/thumb/')) {
+                    hdSrc = hdSrc.replace('/thumb/', '/');
+                    hdSrc = hdSrc.substring(0, hdSrc.lastIndexOf('/'));
+                }
+                
+                const lightbox = document.getElementById('lightbox');
+                const lightboxImg = document.getElementById('lightbox-img');
+                
+                // ★ 究極保險機制：如果高清原圖載入失敗（破圖），立刻退回顯示原本的縮圖 ★
+                lightboxImg.onerror = function() {
+                    console.log("高清原圖不存在，退回顯示安全縮圖！");
+                    this.onerror = null; // 取消錯誤監聽，防止無限迴圈
+                    this.src = thumbSrc; // 強制換回本來就看得到的那張圖
+                };
+
+                // 優先嘗試載入高清圖
+                lightboxImg.src = hdSrc;
+                lightbox.style.display = 'flex';
+            }
+        });
+
+        document.getElementById('lightbox').addEventListener('click', function() {
+            this.style.display = 'none';
+            document.getElementById('lightbox-img').src = ''; 
+        });
+    </script>
+
+</body>
+</html>
