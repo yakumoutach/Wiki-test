@@ -7,131 +7,84 @@
     <title>FF14 角色專屬資訊卡</title>
     <style>
         /* === 🌐 基礎設定 === */
-        body { font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif; background-color: #f1f5f9; color: #1e293b; max-width: 1200px; margin: 30px auto; padding: 20px; }
+        body { font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif; background-color: #f8fafc; color: #1e293b; max-width: 1200px; margin: 30px auto; padding: 20px; }
         h1 { text-align: center; color: #0f172a; margin-bottom: 20px; font-weight: 900; letter-spacing: 1px; }
-        .version-tag { font-size: 14px; color: #4338ca; font-weight: bold; vertical-align: middle; background: #e0e7ff; padding: 4px 10px; border-radius: 8px; border: 1px solid #818cf8; }
+        .version-tag { font-size: 14px; color: #b91c1c; font-weight: bold; vertical-align: middle; background: #fee2e2; padding: 4px 10px; border-radius: 8px; border: 1px solid #f87171; }
         
         /* === 🔍 搜尋列 === */
         .find-panel { display: flex; gap: 10px; margin-bottom: 30px; justify-content: center; }
-        #findInput { width: 100%; max-width: 500px; padding: 14px 20px; font-size: 16px; border: 2px solid #cbd5e1; border-radius: 12px; outline: none; transition: 0.3s; }
+        #findInput { width: 100%; max-width: 500px; padding: 14px 20px; font-size: 16px; border: 2px solid #cbd5e1; border-radius: 12px; outline: none; transition: 0.3s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
         #findInput:focus { border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79,70,229,0.2); }
         #findBtn { padding: 14px 30px; font-size: 16px; background: linear-gradient(135deg, #4f46e5, #3730a3); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        #findBtn:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(79,70,229,0.4); }
+        #findBtn:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(79,70,229,0.3); }
 
-        .loading, .error, .warning { background: white; padding: 20px; border-radius: 12px; text-align: center; font-weight: bold; font-size: 16px; margin-bottom: 20px; border: 2px solid #e2e8f0; }
-        .loading { color: #4f46e5; }
-        .error { color: #ef4444; }
+        .sys-msg { background: white; padding: 20px; border-radius: 12px; text-align: center; font-weight: bold; font-size: 16px; margin-bottom: 20px; border: 2px solid #e2e8f0; }
 
         /* =========================================
-           ⭐️ 絕對還原「附圖三」的藍圖框線排版 ⭐️
+           ⭐️ 絕對鎖死排版：藍圖外框 ⭐️
            ========================================= */
         #blueprint-container {
             display: none; 
             background: #ffffff;
-            border: 2px solid #0f172a; /* 你的手繪外框 */
+            border: 2px solid #0f172a;
             padding: 30px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.1);
         }
 
-        .bp-top-row {
-            display: flex;
-            flex-direction: row;
-            gap: 25px;
-            align-items: stretch;
-            margin-bottom: 25px;
-        }
+        .bp-top-row { display: flex; flex-direction: row; gap: 25px; align-items: stretch; margin-bottom: 25px; }
 
-        /* 💡 左欄：照片區 + 按鈕區 */
+        /* 💡 左欄：照片與版本按鈕 */
         .bp-left-col { flex: 0 0 360px; display: flex; flex-direction: column; gap: 20px; }
-
-        /* 照片框 */
-        .bp-img-box {
-            border: 2px solid #0f172a; 
-            height: 450px;
-            background: #f8fafc;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 10px;
-            position: relative;
-        }
+        
+        .bp-img-box { border: 2px solid #0f172a; height: 450px; background: #f8fafc; display: flex; align-items: center; justify-content: center; padding: 10px; position: relative; }
         .bp-img-box img { max-width: 100%; max-height: 100%; object-fit: contain; cursor: zoom-in; transition: opacity 0.3s; }
         .bp-img-title { position: absolute; top: -14px; left: 15px; background: white; padding: 0 8px; font-weight: 900; color: #0f172a; font-size: 16px; }
 
-        /* 版本按鈕框 */
-        .bp-btn-box {
-            border: 2px solid #0f172a; 
-            padding: 25px 15px 15px 15px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-            position: relative;
-        }
+        .bp-btn-box { border: 2px solid #0f172a; padding: 25px 15px 15px 15px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; position: relative; background: #f8fafc; }
         .bp-btn-title { position: absolute; top: -14px; left: 15px; background: white; padding: 0 8px; font-weight: 900; color: #0f172a; font-size: 16px; }
         
-        .bp-btn { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; color: #334155; transition: 0.2s; font-size: 14px; }
+        .bp-btn { background: #ffffff; border: 1px solid #cbd5e1; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; color: #334155; transition: 0.2s; font-size: 13px; }
         .bp-btn:hover { background: #e2e8f0; }
-        .bp-btn.active { background: #4f46e5; color: white; border-color: #4f46e5; box-shadow: 0 4px 6px rgba(79,70,229,0.2); }
+        .bp-btn.active { background: #4f46e5; color: white; border-color: #4f46e5; }
 
-        /* 💡 右欄：角色與相關信息 */
-        .bp-right-col {
-            flex: 1;
-            border: 2px solid #0f172a; 
-            padding: 30px 25px;
-            position: relative;
-            background: #ffffff;
-            overflow-y: auto;
-            max-height: 550px;
-        }
+        /* 💡 右欄：角色信息逐列呈現 */
+        .bp-right-col { flex: 1; border: 2px solid #0f172a; padding: 25px; position: relative; background: #ffffff; overflow-y: auto; max-height: 550px; }
         .bp-right-col::-webkit-scrollbar { width: 6px; }
         .bp-right-col::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .bp-info-title { position: absolute; top: -14px; left: 15px; background: white; padding: 0 8px; font-weight: 900; color: #0f172a; font-size: 16px; }
+        .bp-info-title { position: absolute; top: -14px; left: 15px; background: white; padding: 0 8px; font-weight: 900; color: #0f172a; font-size: 18px; }
         
-        .info-group { font-size: 18px; font-weight: bold; color: #4f46e5; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin: 20px 0 10px 0; }
+        .info-group { font-size: 17px; font-weight: bold; color: #ffffff; background: #4f46e5; padding: 6px 12px; border-radius: 6px; margin: 15px 0 10px 0; }
         .info-group:first-child { margin-top: 0; }
-        .info-row { display: flex; padding: 12px 0; border-bottom: 1px dashed #e2e8f0; font-size: 15px; line-height: 1.6;}
+        .info-row { display: flex; padding: 10px 0; border-bottom: 1px dashed #e2e8f0; font-size: 15px; line-height: 1.6; word-break: break-all; }
         .info-row:last-child { border-bottom: none; }
-        .info-lbl { flex: 0 0 130px; font-weight: 900; color: #64748b; }
+        .info-lbl { flex: 0 0 120px; font-weight: 900; color: #475569; }
         .info-val { flex: 1; color: #1e293b; }
         .info-val a { color: #3b82f6; text-decoration: none; font-weight: bold; }
         .info-val a:hover { text-decoration: underline; }
-
         .pill { background: #e0e7ff; color: #3730a3; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 700; display: inline-block; margin: 4px; border: 1px solid #c7d2fe; }
 
-        /* 💡 下半部：人物詳細資料 */
-        .bp-bottom-row {
-            border: 2px solid #0f172a; 
-            padding: 30px;
-            position: relative;
-            background: #ffffff;
-            line-height: 1.8;
-            font-size: 16px;
-        }
-        .bp-bottom-title { position: absolute; top: -14px; left: 15px; background: white; padding: 0 8px; font-weight: 900; color: #0f172a; font-size: 16px; }
+        /* 💡 下半部：詳細資料 */
+        .bp-bottom-row { border: 2px solid #0f172a; padding: 30px; position: relative; background: #ffffff; line-height: 1.8; font-size: 16px; overflow-x: auto; }
+        .bp-bottom-title { position: absolute; top: -14px; left: 15px; background: white; padding: 0 8px; font-weight: 900; color: #0f172a; font-size: 18px; }
 
         #wiki-content table { width: 100%; border-collapse: collapse; margin: 15px 0; }
         #wiki-content th, #wiki-content td { border: 1px solid #cbd5e1; padding: 10px; }
         #wiki-content th { background: #f8fafc; }
         #wiki-content img { max-width: 100%; height: auto; border-radius: 8px; margin: 10px 0; cursor: zoom-in; }
-        
         .navbox, .mw-editsection, .noprint, .toc, .pi-header { display: none !important; }
-        
         .read-more { display: block; margin-top: 30px; text-align: center; font-size: 16px; font-weight: bold; padding: 15px; background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 12px; color: #475569; text-decoration: none; }
-        .read-more:hover { background: #e2e8f0; }
 
         /* 燈箱 */
         #lightbox { display: none; position: fixed; z-index: 999999; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); align-items: center; justify-content: center; flex-direction: column; backdrop-filter: blur(5px); }
         #lightbox img { max-width: 90%; max-height: 85vh; border-radius: 8px; border: 3px solid #fff; }
         #lightbox-close { color: white; margin-top: 25px; padding: 10px 30px; font-size: 16px; background: rgba(255,255,255,0.2); border-radius: 30px; cursor: pointer; font-weight: bold; border: 1px solid rgba(255,255,255,0.4); }
-        #lightbox-close:hover { background: rgba(255,255,255,0.3); }
 
         @media (max-width: 900px) { .bp-top-row { flex-direction: column; } .bp-left-col { flex: auto; width: 100%; } }
     </style>
 </head>
 <body>
 
-    <h1>🗡️ FF14 角色資訊面板 <span class="version-tag">(v1666 絕對領域實裝版)</span></h1>
+    <h1>🗡️ FF14 角色資訊面板 <span class="version-tag">(v17 真理之眼實裝版)</span></h1>
     
     <div class="find-panel">
         <input type="text" id="findInput" placeholder="請輸入關鍵字（例如：塔塔露...）" value="塔塔露">
@@ -141,7 +94,6 @@
     <div id="status-msg"></div>
 
     <div id="blueprint-container">
-        
         <div class="bp-top-row">
             <div class="bp-left-col">
                 <div class="bp-img-box">
@@ -155,7 +107,7 @@
             </div>
             
             <div class="bp-right-col">
-                <div class="bp-info-title">角色信息、相關信息逐列式呈現</div>
+                <div class="bp-info-title">角色信息 / 相關信息 逐列呈現</div>
                 <div id="dash-right"></div>
             </div>
         </div>
@@ -164,7 +116,6 @@
             <div class="bp-bottom-title">簡介以後的資料排版</div>
             <div id="wiki-content"></div>
         </div>
-        
     </div>
 
     <div id="lightbox">
@@ -188,7 +139,7 @@
             function triggerSearch() {
                 const keyword = input.value.trim();
                 if (!keyword) return;
-                statusMsg.innerHTML = `<div class="loading">🟢 啟動掃描協議，正在連接...</div>`;
+                statusMsg.innerHTML = `<div class="sys-msg" style="color:#4f46e5;">🟢 啟動防禦破解，正在搜尋...</div>`;
                 bpContainer.style.display = 'none';
                 executeDashboardBuild(keyword);
             }
@@ -199,7 +150,7 @@
                     window[callbackName] = function(data) { delete window[callbackName]; document.body.removeChild(script); resolve(data); };
                     const script = document.createElement('script');
                     script.src = url + '&callback=' + callbackName;
-                    script.onerror = () => reject(new Error('JSONP 被阻擋'));
+                    script.onerror = () => reject(new Error('JSONP blocked'));
                     document.body.appendChild(script);
                 });
             }
@@ -212,7 +163,7 @@
                 try { let res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`); let data = await res.json(); if (isValid(data)) return data; } catch(e) {}
                 try { let res = await fetch(`https://corsproxy.io/?${encodeURIComponent(targetUrl)}`); let data = await res.json(); if (isValid(data)) return data; } catch(e) {}
                 try { let res = await fetch(targetUrl + '&origin=*'); let data = await res.json(); if (isValid(data)) return data; } catch(e) {}
-                throw new Error("防火牆攔截了所有的請求，請稍後再試。");
+                throw new Error("遭到伺服器阻擋，請稍後再試。");
             }
 
             function getHighResUrl(img) {
@@ -240,15 +191,15 @@
                     let data = await superFetch(searchKeyword);
                     
                     if (data.error) {
-                        statusMsg.innerHTML = `<div class="error">找不到關於「${keyword}」的資訊。</div>`;
+                        statusMsg.innerHTML = `<div class="sys-msg" style="color:#ef4444;">找不到關於「${keyword}」的資訊。</div>`;
                         return;
                     }
 
-                    statusMsg.innerHTML = `<div class="loading">🔨 資料取得！正在進行全域掃描與渲染排版...</div>`;
+                    statusMsg.innerHTML = `<div class="sys-msg" style="color:#4f46e5;">🔨 突破成功！正在渲染絕對領域排版...</div>`;
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(data.parse.text['*'], 'text/html');
 
-                    // 1. 物理剝除超連結，防止跳轉
+                    // 拔除超連結
                     doc.querySelectorAll('a').forEach(a => {
                         const img = a.querySelector('img');
                         if (img) { a.parentNode.insertBefore(img, a); a.remove(); } 
@@ -259,54 +210,66 @@
                         }
                     });
 
+                    // 🧹 清除編輯按鈕
+                    doc.querySelectorAll('.mw-editsection, .noprint, style, script, .toc').forEach(e => e.remove());
+
                     // ==========================================
-                    // ⭐️ 核心技術：全域畫廊提取與毀屍滅跡系統 ⭐️
+                    // ⭐️ 終極除草機：精準打擊所有的「隱形服裝清單」
                     // ==========================================
                     characterImages = [];
                     const addedUrls = new Set(); 
                     
-                    // 掃描全網頁中所有的頁籤/畫廊元件 (包含文章區與資訊框)
-                    const galleries = doc.querySelectorAll('.huiji-tabs, .tabber, .pi-image-collection');
-                    
-                    galleries.forEach(gallery => {
-                        // 抓出導航按鈕的文字 (這就是"重生之境"等文字的來源)
-                        let navItems = gallery.querySelectorAll('.nav-tabs li, .tabbernav a, .pi-image-collection-tabs li');
-                        // 抓出對應的內容區塊
-                        let panes = gallery.querySelectorAll('.tab-pane, .tabbertab, .pi-image-collection-tab-content');
+                    // 1. 針對有 Class 的頁籤導航 (一般情況)
+                    doc.querySelectorAll('ul.nav-tabs, ul.tabbernav, ul.pi-image-collection-tabs, ul.huiji-tabs-nav').forEach(ul => {
+                        let links = ul.querySelectorAll('li, a');
                         
-                        let foundImages = false;
-                        panes.forEach((pane, idx) => {
-                            let img = pane.querySelector('img');
-                            if(img) {
-                                let src = getHighResUrl(img);
-                                let label = "外觀預覽";
-                                if(navItems[idx]) label = navItems[idx].textContent.trim();
-                                else if (pane.getAttribute('title')) label = pane.getAttribute('title');
-                                
-                                if(src && !addedUrls.has(src)) { 
-                                    addedUrls.add(src); 
-                                    characterImages.push({url: src, label}); 
-                                    foundImages = true;
+                        // 尋找鄰近的內容區塊
+                        let contentContainer = ul.nextElementSibling;
+                        if (!contentContainer || !contentContainer.classList.contains('tab-content')) {
+                            contentContainer = ul.parentElement.querySelector('.tab-content, .tabber, .pi-image-collection-tab-content');
+                        }
+
+                        if (contentContainer) {
+                            let panes = contentContainer.querySelectorAll('.tab-pane, .tabbertab, .pi-image-collection-tab-content');
+                            panes.forEach((pane, idx) => {
+                                let img = pane.querySelector('img');
+                                if (img) {
+                                    let src = getHighResUrl(img);
+                                    let label = links[idx] ? links[idx].textContent.trim() : "外觀預覽";
+                                    if (src && !addedUrls.has(src)) { addedUrls.add(src); characterImages.push({url: src, label}); }
                                 }
-                            }
-                        });
-                        
-                        // ⚠️ 最重要的一步：只要這個群組裡有圖片，我們抽完資料後，就把整個群組「物理刪除」！
-                        // 這樣那些 "重生之境" 的文字就絕對不可能掉到下方的文章區塊了！
-                        if (foundImages) gallery.remove(); 
+                            });
+                            contentContainer.remove(); // 銷毀圖片區塊
+                        }
+                        ul.remove(); // ⚠️ 絕對銷毀！把產生黑點點的 ul 直接從網頁中連根拔起
                     });
 
-                    // 移除多餘的編輯按鈕
-                    doc.querySelectorAll('.mw-editsection, .noprint, style, script').forEach(e => e.remove());
+                    // 2. 針對沒有 Class 的野生清單 (地毯式搜索，解決塔塔露特例)
+                    doc.querySelectorAll('ul').forEach(ul => {
+                        let text = ul.textContent.replace(/\s/g, '');
+                        // 如果這個清單裡面包含 FF14 常見的服裝名稱，判定為被扒光的頁籤，直接物理毀滅！
+                        if (text.includes('重生之境') || text.includes('晓月之终途') || text.includes('采矿工') || text.includes('请假')) {
+                            ul.remove(); 
+                        }
+                    });
 
                     // ==========================================
-                    // 解析右側資訊框
+                    // ⭐️ 終極資訊框捕捉：解決右邊空白問題
                     // ==========================================
-                    const infobox = doc.querySelector('.infobox, .portable-infobox, table[class*="infobox"]');
+                    // 如果用 class 找不到，直接抓「排在右邊的表格」或「第一個出現的大表格」
+                    let infobox = doc.querySelector('.infobox, table.infobox, div.infobox, table.acbox, .huiji-infobox, table.character-box');
+                    if (!infobox) {
+                        let tables = doc.querySelectorAll('table');
+                        for (let t of tables) {
+                            if (t.style.float === 'right' || t.getAttribute('align') === 'right' || t.classList.contains('wikitable')) {
+                                infobox = t; break;
+                            }
+                        }
+                    }
+
                     let rightPanelHtml = '';
-
                     if (infobox) {
-                        // 撿漏：如果還有沒被全域掃描抓走的散落圖片
+                        // 撿漏剩下的圖片
                         infobox.querySelectorAll('img').forEach(img => {
                             let src = getHighResUrl(img);
                             if(src && !addedUrls.has(src)) {
@@ -343,8 +306,7 @@
                                 }
                             }
                         });
-                        // 資訊框解析完畢，也將其物理刪除
-                        infobox.remove(); 
+                        infobox.remove(); // 抓完資料後毀滅資訊框
                     }
 
                     if (characterImages.length === 0) characterImages.push({ url: 'https://via.placeholder.com/350x450?text=無圖片', label: '預設' });
@@ -354,7 +316,8 @@
                     // ==========================================
                     
                     // 1. 渲染右側資料
-                    document.getElementById('dash-right').innerHTML = s2tConverter(rightPanelHtml) || '<div class="info-row">無詳細資料</div>';
+                    if (!rightPanelHtml) rightPanelHtml = `<div class="info-row"><div class="info-val">此角色可能沒有詳細的表格資料。</div></div>`;
+                    document.getElementById('dash-right').innerHTML = s2tConverter(rightPanelHtml);
                     
                     // 2. 渲染左側切換按鈕
                     const controlsContainer = document.getElementById('dash-img-controls');
@@ -386,7 +349,7 @@
                     bpContainer.style.display = 'block'; 
 
                 } catch (error) {
-                    document.getElementById('status-msg').innerHTML = `<div class="error">發生錯誤：${error.message}</div>`;
+                    document.getElementById('status-msg').innerHTML = `<div class="sys-msg" style="color:#ef4444;">發生錯誤：${error.message}</div>`;
                 }
             }
 
@@ -405,7 +368,6 @@
                 }
             };
 
-            // 全局燈箱
             document.addEventListener('click', function(e) {
                 if (e.target.tagName === 'IMG' && e.target.id !== 'lightbox-img') {
                     e.preventDefault(); e.stopPropagation();
