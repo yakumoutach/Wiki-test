@@ -12,12 +12,12 @@
         h1 { text-align: center; color: #111827; margin-bottom: 20px; font-weight: 800; letter-spacing: 1px; }
         .version-tag { font-size: 14px; color: #4f46e5; font-weight: bold; vertical-align: middle; background: #e0e7ff; padding: 4px 8px; border-radius: 8px; }
         
-        /* === 🔍 搜尋列 === */
-        .search-container { display: flex; gap: 10px; margin-bottom: 30px; justify-content: center; }
-        input[type="text"] { width: 100%; max-width: 500px; padding: 14px 20px; font-size: 16px; border: 2px solid #d1d5db; border-radius: 30px; outline: none; transition: 0.3s; }
-        input[type="text"]:focus { border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79,70,229,0.2); }
-        button { padding: 14px 30px; font-size: 16px; background: #4f46e5; color: white; border: none; border-radius: 30px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        button:hover { background: #4338ca; }
+        /* === 🔍 搜尋列 (改名避開廣告阻擋器) === */
+        .find-panel { display: flex; gap: 10px; margin-bottom: 30px; justify-content: center; }
+        #findInput { width: 100%; max-width: 500px; padding: 14px 20px; font-size: 16px; border: 2px solid #d1d5db; border-radius: 30px; outline: none; transition: 0.3s; }
+        #findInput:focus { border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79,70,229,0.2); }
+        #findBtn { padding: 14px 30px; font-size: 16px; background: #4f46e5; color: white; border: none; border-radius: 30px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        #findBtn:hover { background: #4338ca; }
 
         .loading, .error, .warning { background: white; padding: 20px; border-radius: 12px; text-align: center; font-weight: bold; font-size: 16px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .loading { color: #4f46e5; }
@@ -41,18 +41,16 @@
         #dash-left { flex: 0 0 350px; display: flex; flex-direction: column; gap: 15px; }
         #dash-img-container {
             width: 100%; height: 450px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px;
-            display: flex; align-items: center; justify-content: center; overflow: hidden;
-            position: relative;
+            display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative;
         }
         #dash-main-img { max-width: 100%; max-height: 100%; object-fit: contain; cursor: zoom-in; transition: opacity 0.3s ease; }
         
-        /* 版本按鈕區 */
         #dash-img-controls { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; }
         .img-btn { background: #ffffff; color: #475569; border: 1px solid #cbd5e1; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: bold; transition: 0.2s; }
         .img-btn:hover { background: #e2e8f0; }
         .img-btn.active { background: #4f46e5; color: white; border-color: #4f46e5; box-shadow: 0 4px 6px rgba(79,70,229,0.2); }
 
-        /* 💡 區塊二：右側 (角色與相關信息逐列呈現) */
+        /* 💡 區塊二：右側 (角色信息逐列呈現) */
         #dash-right { flex: 1; display: flex; flex-direction: column; gap: 0; overflow-y: auto; max-height: 550px; padding-right: 15px; }
         #dash-right::-webkit-scrollbar { width: 6px; }
         #dash-right::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
@@ -60,7 +58,7 @@
         .dash-section-title { font-size: 22px; font-weight: 800; color: #111827; border-bottom: 3px solid #4f46e5; padding-bottom: 10px; margin: 0 0 15px 0; display: inline-block; }
         .dash-group-title { font-size: 16px; font-weight: bold; color: #ffffff; margin: 15px 0 5px 0; background: #4f46e5; padding: 8px 15px; border-radius: 6px; }
         
-        /* 逐列資料行排版 */
+        /* 逐列式呈現的排版 */
         .dash-row { display: flex; align-items: flex-start; padding: 12px 0; border-bottom: 1px dashed #e5e7eb; font-size: 15px; line-height: 1.6; }
         .dash-row:last-child { border-bottom: none; }
         .dash-lbl { flex: 0 0 130px; font-weight: bold; color: #6b7280; padding-top: 2px; }
@@ -68,9 +66,9 @@
         .dash-val a { color: #3b82f6; text-decoration: none; font-weight: bold; }
         .dash-val a:hover { text-decoration: underline; }
 
-        /* 🛠️ 神奇魔法：將右側的「黑點點清單」自動轉換成「漂亮標籤 (Pills)」 */
-        #dash-right ul, #dash-right ol { list-style: none !important; padding: 0 !important; margin: 4px 0 0 0 !important; display: flex; flex-wrap: wrap; gap: 8px; }
-        #dash-right li { background: #e0e7ff; color: #3730a3; padding: 4px 12px; border-radius: 20px; font-size: 13px; font-weight: 700; display: inline-block; border: 1px solid #c7d2fe; }
+        /* 沒有冒號的清單會變成藍色圓角標籤 */
+        .pill-container { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+        .dash-pill { background: #e0e7ff; color: #3730a3; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; display: inline-block; border: 1px solid #c7d2fe; }
 
         /* 💡 區塊三：下方 (人物詳細資料) */
         #wiki-content { background: #ffffff; border-radius: 16px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); display: none; line-height: 1.8; font-size: 16px; overflow-x: auto; }
@@ -83,7 +81,7 @@
         .read-more { display: block; margin-top: 40px; text-align: center; font-size: 16px; font-weight: bold; padding: 15px; background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 12px; color: #475569; transition: 0.2s; text-decoration: none; }
         .read-more:hover { background: #e2e8f0; color: #0f172a; }
 
-        /* 💡 燈箱設計 (絕對圖層防禦) */
+        /* 💡 燈箱設計 */
         #lightbox { display: none; position: fixed; z-index: 999999; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); align-items: center; justify-content: center; flex-direction: column; backdrop-filter: blur(5px); }
         #lightbox img { max-width: 90%; max-height: 85vh; border-radius: 8px; border: 3px solid #fff; box-shadow: 0 10px 40px rgba(0,0,0,0.8); object-fit: contain; }
         #lightbox-close { color: white; margin-top: 25px; padding: 10px 30px; font-size: 16px; background: rgba(255,255,255,0.2); border-radius: 30px; cursor: pointer; font-weight: bold; border: 1px solid rgba(255,255,255,0.4); transition: 0.2s; }
@@ -92,13 +90,125 @@
         @media (max-width: 800px) {
             #custom-dashboard { flex-direction: column; }
             #dash-left { flex: auto; width: 100%; }
-            #dash-img-container { height: 350px; }
         }
     </style>
 </head>
 <body>
 
-    <h1>🗡️ FF14 角色資訊面板 <span class="version-tag">(v8.0 完美架構版)</span></h1>
+    <h1>🗡️ FF14 角色資訊面板 <span class="version-tag">(v8.1 搜尋回歸與完美解析版)</span></h1>
     
-    <div class="search-container">
-        <input type="text" id="searchInput" placeholder="請輸入關鍵字（例如：塔塔露...）" value="塔塔露
+    <div class="find-panel">
+        <input type="text" id="findInput" placeholder="請輸入關鍵字（例如：塔塔露...）" value="塔塔露">
+        <button id="findBtn" onclick="startSearch()">搜尋角色</button>
+    </div>
+
+    <div id="status-msg"></div>
+
+    <div id="custom-dashboard">
+        <div id="dash-left">
+            <div id="dash-img-container">
+                <img id="dash-main-img" src="" alt="角色圖片">
+            </div>
+            <div id="dash-img-controls"></div>
+        </div>
+        <div id="dash-right"></div>
+    </div>
+
+    <div id="wiki-content"></div>
+
+    <div id="lightbox">
+        <img id="lightbox-img" src="" alt="放大圖片">
+        <div id="lightbox-close">✖ 點擊關閉</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js" async></script>
+
+    <script>
+        let characterImages = [];
+
+        window.onload = function() {
+            document.getElementById('findInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') startSearch();
+            });
+        };
+
+        function fetchJsonp(url) {
+            return new Promise((resolve, reject) => {
+                const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
+                window[callbackName] = function(data) {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    resolve(data);
+                };
+                const script = document.createElement('script');
+                script.src = url + '&callback=' + callbackName;
+                script.onerror = () => reject(new Error('伺服器連線超時'));
+                document.body.appendChild(script);
+            });
+        }
+
+        async function startSearch() {
+            const statusMsg = document.getElementById('status-msg');
+            const keyword = document.getElementById('findInput').value.trim();
+            if (!keyword) return;
+
+            statusMsg.innerHTML = `<div class="loading">🚀 正在前往以太之光擷取資料...</div>`;
+            document.getElementById('custom-dashboard').style.display = 'none';
+            document.getElementById('wiki-content').style.display = 'none';
+
+            try {
+                let s2tConverter = (text) => text;
+                let t2sConverter = (text) => text;
+
+                if (typeof OpenCC !== 'undefined') {
+                    s2tConverter = OpenCC.Converter({ from: 'cn', to: 'tw' });
+                    t2sConverter = OpenCC.Converter({ from: 'tw', to: 'cn' });
+                } else {
+                    statusMsg.innerHTML += `<div class="warning" style="font-size:14px; margin-top:10px;">⚠️ 繁簡轉換器載入異常，將以簡體顯示。</div>`;
+                }
+
+                await buildCustomDashboard(keyword, s2tConverter, t2sConverter, statusMsg);
+
+            } catch (err) {
+                statusMsg.innerHTML = `<div class="error">系統錯誤：${err.message}</div>`;
+            }
+        }
+
+        async function buildCustomDashboard(keyword, s2tConverter, t2sConverter, statusMsg) {
+            const searchKeyword = t2sConverter(keyword);
+            statusMsg.innerHTML = `<div class="loading">🔨 資料取得成功，正在組裝客製化面板...</div>`;
+
+            const baseUrl = "https://ff14.huijiwiki.com/api.php";
+            const params = new URLSearchParams({
+                action: "parse",
+                format: "json",
+                page: searchKeyword,
+                redirects: "1",
+                prop: "text"
+            });
+
+            const data = await fetchJsonp(`${baseUrl}?${params.toString()}`);
+
+            if (data.error) {
+                statusMsg.innerHTML = `<div class="error">找不到關於「${keyword}」的資訊。</div>`;
+                return;
+            }
+
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(data.parse.text['*'], 'text/html');
+
+            // ⚠️ 剝除圖片外層的超連結，保證絕不跳轉！
+            doc.querySelectorAll('a').forEach(a => {
+                const img = a.querySelector('img');
+                if (img) {
+                    a.parentNode.insertBefore(img, a); 
+                    a.remove(); 
+                } else {
+                    let href = a.getAttribute('href');
+                    if (href && href.startsWith('/')) a.setAttribute('href', 'https://ff14.huijiwiki.com' + href);
+                    a.setAttribute('target', '_blank');
+                }
+            });
+
+            // 砍掉無用編輯按鈕，避免干擾抓取
+            doc.querySelectorAll('.mw
