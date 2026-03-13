@@ -23,11 +23,9 @@
         .loading { color: #4f46e5; }
         .error { color: #ef4444; }
 
-        /* =========================================
-           ⭐️ 完全依照「附圖三」設計的專屬面板 ⭐️
-           ========================================= */
+        /* === ⭐️ 專屬客製化儀表板 === */
         #custom-dashboard {
-            display: none; /* 預設隱藏，有資料才顯示 */
+            display: none;
             flex-direction: row;
             gap: 30px;
             background: #ffffff;
@@ -38,112 +36,331 @@
         }
 
         /* 💡 左側：人物照片與版本按鈕 */
-        #dash-left {
-            flex: 0 0 350px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
+        #dash-left { flex: 0 0 350px; display: flex; flex-direction: column; gap: 15px; }
         #dash-img-container {
-            width: 100%;
-            height: 450px;
-            background: #f8fafc;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            box-shadow: inset 0 2px 10px rgba(0,0,0,0.02);
+            width: 100%; height: 450px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; overflow: hidden;
         }
-        #dash-main-img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-            cursor: zoom-in;
-            transition: opacity 0.3s ease;
-        }
-        /* 版本按鈕區 */
-        #dash-img-controls {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            justify-content: center;
-        }
-        .img-btn {
-            background: #f1f5f9;
-            color: #475569;
-            border: 1px solid #cbd5e1;
-            padding: 8px 14px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: bold;
-            transition: 0.2s;
-        }
+        #dash-main-img { max-width: 100%; max-height: 100%; object-fit: contain; cursor: zoom-in; transition: opacity 0.3s ease; }
+        #dash-img-controls { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+        .img-btn { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: bold; transition: 0.2s; }
         .img-btn:hover { background: #e2e8f0; }
         .img-btn.active { background: #4f46e5; color: white; border-color: #4f46e5; }
 
-        /* 💡 右側：角色信息與相關信息 (逐列呈現) */
-        #dash-right {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            overflow-y: auto;
-            max-height: 550px; /* 超出高度可滾動 */
-            padding-right: 10px;
-        }
-        /* 滾動條美化 */
+        /* 💡 右側：角色信息與相關信息 */
+        #dash-right { flex: 1; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; max-height: 550px; padding-right: 10px; }
         #dash-right::-webkit-scrollbar { width: 6px; }
         #dash-right::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         
-        /* 區塊標題 (例如：角色信息) */
-        .dash-section-title {
-            font-size: 20px;
-            font-weight: 800;
-            color: #111827;
-            border-bottom: 3px solid #4f46e5;
-            padding-bottom: 8px;
-            margin: 0 0 10px 0;
-            display: inline-block;
-        }
-        /* 子標題 (例如：基本信息) */
-        .dash-group-title {
-            font-size: 16px;
-            font-weight: bold;
-            color: #4f46e5;
-            margin: 10px 0 5px 0;
-            background: #e0e7ff;
-            padding: 6px 12px;
-            border-radius: 6px;
-        }
-        /* 逐列資料行 */
-        .dash-row {
-            display: flex;
-            padding: 10px 0;
-            border-bottom: 1px dashed #e5e7eb;
-            font-size: 15px;
-            line-height: 1.5;
-        }
+        .dash-section-title { font-size: 20px; font-weight: 800; color: #111827; border-bottom: 3px solid #4f46e5; padding-bottom: 8px; margin: 0 0 10px 0; display: inline-block; }
+        .dash-group-title { font-size: 16px; font-weight: bold; color: #4f46e5; margin: 10px 0 5px 0; background: #e0e7ff; padding: 6px 12px; border-radius: 6px; }
+        .dash-row { display: flex; padding: 10px 0; border-bottom: 1px dashed #e5e7eb; font-size: 15px; line-height: 1.5; }
         .dash-row:last-child { border-bottom: none; }
-        .dash-lbl {
-            flex: 0 0 120px;
-            font-weight: bold;
-            color: #6b7280;
-        }
-        .dash-val {
-            flex: 1;
-            color: #1f2937;
-        }
+        .dash-lbl { flex: 0 0 120px; font-weight: bold; color: #6b7280; }
+        .dash-val { flex: 1; color: #1f2937; }
         .dash-val a { color: #3b82f6; text-decoration: none; }
         .dash-val a:hover { text-decoration: underline; }
 
         /* === 📖 剩餘的 Wiki 文章區塊 === */
-        #wiki-content {
-            background: #ffffff; border-radius: 16px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); display: none; line-height: 1.8; font-size: 16px; overflow-x: auto;
-        }
+        #wiki-content { background: #ffffff; border-radius: 16px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); display: none; line-height: 1.8; font-size: 16px; overflow-x: auto; }
         #wiki-content table.wikitable { width: 100%; border-collapse: collapse; margin: 20px 0; }
         #wiki-content table.wikitable th, #wiki-content table.wikitable td { border: 1px solid #d1d5db; padding: 10px; }
         #wiki-content table.wikitable th { background: #f3f4f6; }
-        #wiki
+        #wiki-content img { max-width: 100%; height: auto; border-radius: 8px; }
+        .navbox, .mw-editsection, .noprint, .toc, .pi-header { display: none !important; }
+        .read-more { display: block; margin-top: 40px; text-align: center; font-size: 16px; font-weight: bold; padding: 15px; background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 12px; color: #475569; transition: 0.2s; text-decoration: none; }
+        .read-more:hover { background: #e2e8f0; color: #0f172a; }
+
+        /* 燈箱 */
+        #lightbox { display: none; position: fixed; z-index: 9999; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; flex-direction: column; }
+        #lightbox img { max-width: 90%; max-height: 85vh; border-radius: 8px; border: 3px solid #fff; }
+        #lightbox-close { color: white; margin-top: 20px; padding: 8px 25px; font-size: 16px; background: rgba(255,255,255,0.2); border-radius: 20px; cursor: pointer; }
+
+        @media (max-width: 800px) {
+            #custom-dashboard { flex-direction: column; }
+            #dash-left { flex: auto; width: 100%; }
+            #dash-img-container { height: 350px; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🗡️ FF14 角色資訊面板 <span class="version-tag">(v6.1 絕對顯示版)</span></h1>
+    
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="請輸入關鍵字（例如：塔塔露...）" value="塔塔露">
+        <button id="searchBtn" onclick="startSearch()">搜尋角色</button>
+    </div>
+
+    <div id="status-msg"></div>
+
+    <div id="custom-dashboard">
+        <div id="dash-left">
+            <div id="dash-img-container">
+                <img id="dash-main-img" src="" alt="角色圖片">
+            </div>
+            <div id="dash-img-controls"></div>
+        </div>
+        <div id="dash-right"></div>
+    </div>
+
+    <div id="wiki-content"></div>
+
+    <div id="lightbox">
+        <img id="lightbox-img" src="" alt="放大圖片">
+        <div id="lightbox-close">✖ 點擊關閉</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js" async></script>
+
+    <script>
+        let characterImages = [];
+
+        window.onload = function() {
+            document.getElementById('searchInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') startSearch();
+            });
+        };
+
+        function fetchJsonp(url) {
+            return new Promise((resolve, reject) => {
+                const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
+                window[callbackName] = function(data) {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    resolve(data);
+                };
+                const script = document.createElement('script');
+                script.src = url + '&callback=' + callbackName;
+                script.onerror = () => reject(new Error('伺服器連線超時'));
+                document.body.appendChild(script);
+            });
+        }
+
+        async function startSearch() {
+            const statusMsg = document.getElementById('status-msg');
+            const keyword = document.getElementById('searchInput').value.trim();
+            if (!keyword) return;
+
+            statusMsg.innerHTML = `<div class="loading">🚀 正在前往以太之光擷取資料...</div>`;
+            document.getElementById('custom-dashboard').style.display = 'none';
+            document.getElementById('wiki-content').style.display = 'none';
+
+            try {
+                let s2tConverter = (text) => text;
+                let t2sConverter = (text) => text;
+
+                if (typeof OpenCC !== 'undefined') {
+                    s2tConverter = OpenCC.Converter({ from: 'cn', to: 'tw' });
+                    t2sConverter = OpenCC.Converter({ from: 'tw', to: 'cn' });
+                } else {
+                    statusMsg.innerHTML += `<div class="warning" style="font-size:14px; margin-top:10px;">⚠️ 繁簡轉換器載入異常，將以簡體顯示。</div>`;
+                }
+
+                await buildCustomDashboard(keyword, s2tConverter, t2sConverter, statusMsg);
+
+            } catch (err) {
+                statusMsg.innerHTML = `<div class="error">系統錯誤：${err.message}</div>`;
+            }
+        }
+
+        async function buildCustomDashboard(keyword, s2tConverter, t2sConverter, statusMsg) {
+            const searchKeyword = t2sConverter(keyword);
+            statusMsg.innerHTML = `<div class="loading">🔨 資料取得成功，正在組裝客製化面板...</div>`;
+
+            const baseUrl = "https://ff14.huijiwiki.com/api.php";
+            const params = new URLSearchParams({
+                action: "parse",
+                format: "json",
+                page: searchKeyword,
+                redirects: "1",
+                prop: "text"
+            });
+
+            const data = await fetchJsonp(`${baseUrl}?${params.toString()}`);
+
+            if (data.error) {
+                statusMsg.innerHTML = `<div class="error">找不到關於「${keyword}」的資訊。</div>`;
+                return;
+            }
+
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(data.parse.text['*'], 'text/html');
+
+            const infobox = doc.querySelector('.infobox, .portable-infobox, table[class*="infobox"]');
+            
+            if (infobox) {
+                characterImages = [];
+                const imgNodes = infobox.querySelectorAll('img');
+                const addedUrls = new Set(); 
+
+                imgNodes.forEach(img => {
+                    let src = img.getAttribute('data-src') || img.getAttribute('data-lazy-src') || img.getAttribute('src');
+                    if (!src || src.includes('16px') || src.includes('20px')) return; 
+
+                    if (src.startsWith('//')) src = 'https:' + src;
+                    else if (src.startsWith('/')) src = 'https://ff14.huijiwiki.com' + src;
+                    
+                    if (src.includes('/thumb/')) {
+                        src = src.replace('/thumb/', '/');
+                        src = src.substring(0, src.lastIndexOf('/'));
+                    }
+
+                    if(addedUrls.has(src)) return;
+                    addedUrls.add(src);
+
+                    let label = "外觀預覽";
+                    let tabPane = img.closest('.tab-pane, .tabbertab, .pi-image-collection-tab-content');
+                    if (tabPane) {
+                        label = tabPane.getAttribute('title') || tabPane.getAttribute('data-title') || label;
+                        let ref = tabPane.getAttribute('data-ref');
+                        if (ref) {
+                            let navLi = infobox.querySelector(`.pi-image-collection-tabs li[data-ref="${ref}"]`);
+                            if (navLi) label = navLi.textContent.trim();
+                        }
+                    } else if (img.getAttribute('alt')) {
+                        let altText = img.getAttribute('alt');
+                        if (altText.length < 15) label = altText;
+                    }
+
+                    characterImages.push({ url: src, label: label });
+                });
+
+                if (characterImages.length === 0) {
+                    characterImages.push({ url: 'https://via.placeholder.com/350x450?text=無圖片', label: '預設' });
+                }
+
+                let rightPanelHtml = '';
+                const mainTabs = infobox.querySelectorAll('.huiji-tab-content > .tab-pane, .pi-theme-default > .tabber > .tabbertab');
+
+                function extractRows(container) {
+                    let html = '';
+                    const nodes = container.querySelectorAll('.pi-header, .pi-data');
+                    nodes.forEach(node => {
+                        if (node.classList.contains('pi-header')) {
+                            html += `<div class="dash-group-title">${node.innerHTML}</div>`;
+                        } else if (node.classList.contains('pi-data')) {
+                            let lbl = node.querySelector('.pi-data-label');
+                            let val = node.querySelector('.pi-data-value');
+                            
+                            if (val) {
+                                val.querySelectorAll('a').forEach(a => {
+                                    let href = a.getAttribute('href');
+                                    if (href && href.startsWith('/')) a.setAttribute('href', 'https://ff14.huijiwiki.com' + href);
+                                    a.setAttribute('target', '_blank');
+                                });
+                            }
+
+                            if (lbl && val) {
+                                html += `<div class="dash-row"><div class="dash-lbl">${lbl.innerHTML}</div><div class="dash-val">${val.innerHTML}</div></div>`;
+                            } else if (val) {
+                                html += `<div class="dash-row"><div class="dash-val" style="font-style:italic;">${val.innerHTML}</div></div>`;
+                            }
+                        }
+                    });
+                    return html;
+                }
+
+                if (mainTabs.length > 0) {
+                    mainTabs.forEach(tab => {
+                        let tabTitle = tab.getAttribute('title') || tab.getAttribute('data-title') || '資訊';
+                        rightPanelHtml += `<div class="dash-section-title">${tabTitle}</div>`;
+                        rightPanelHtml += extractRows(tab);
+                    });
+                } else {
+                    rightPanelHtml += extractRows(infobox);
+                }
+
+                rightPanelHtml = s2tConverter(rightPanelHtml);
+
+                document.getElementById('dash-right').innerHTML = rightPanelHtml || '<div class="dash-row">無詳細資料</div>';
+                
+                const controlsContainer = document.getElementById('dash-img-controls');
+                controlsContainer.innerHTML = '';
+                characterImages.forEach((imgObj, index) => {
+                    let translatedLabel = s2tConverter(imgObj.label);
+                    let btn = document.createElement('button');
+                    btn.className = `img-btn ${index === 0 ? 'active' : ''}`;
+                    btn.innerText = translatedLabel;
+                    btn.onclick = () => changeDashboardImage(index, btn);
+                    controlsContainer.appendChild(btn);
+                });
+
+                changeDashboardImage(0, controlsContainer.firstChild);
+
+                infobox.remove();
+                document.getElementById('custom-dashboard').style.display = 'flex';
+            }
+
+            doc.querySelectorAll('ul[class*="nav"], div[class*="nav"], .tabbernav').forEach(el => el.remove());
+            doc.querySelectorAll('li, p').forEach(el => {
+                if ((el.textContent || '').replace(/\s/g, '') === '' && !el.querySelector('img')) el.remove();
+            });
+            doc.querySelectorAll('.tab-pane, .tabbertab').forEach(el => {
+                el.style.display = 'block'; el.style.opacity = '1'; el.style.visibility = 'visible'; el.style.height = 'auto';
+            });
+            
+            doc.querySelectorAll('img').forEach(img => {
+                let src = img.getAttribute('data-src') || img.getAttribute('src');
+                if (src) {
+                    if (src.startsWith('//')) src = 'https:' + src;
+                    else if (src.startsWith('/')) src = 'https://ff14.huijiwiki.com' + src;
+                    img.setAttribute('src', src);
+                }
+                img.removeAttribute('data-src'); img.removeAttribute('srcset'); img.classList.remove('lazyload');
+            });
+            doc.querySelectorAll('a').forEach(a => {
+                let href = a.getAttribute('href');
+                if (href && href.startsWith('/')) a.setAttribute('href', 'https://ff14.huijiwiki.com' + href);
+                a.setAttribute('target', '_blank');
+            });
+
+            function translateTextNodes(node) {
+                if (node.nodeType === 3) node.nodeValue = s2tConverter(node.nodeValue);
+                else if (node.nodeType === 1 && node.nodeName !== 'SCRIPT' && node.nodeName !== 'STYLE') {
+                    node.childNodes.forEach(child => translateTextNodes(child));
+                }
+            }
+            const rootNode = doc.querySelector('.mw-parser-output') || doc.body;
+            translateTextNodes(rootNode);
+
+            document.getElementById('status-msg').innerHTML = '';
+            
+            const wikiUrl = `https://ff14.huijiwiki.com/wiki/${encodeURIComponent(data.parse.title)}`;
+            const readMoreBtn = `<a href="${wikiUrl}" target="_blank" class="read-more">🔗 前往灰機 Wiki 閱讀完整條目</a>`;
+            
+            const contentDiv = document.getElementById('wiki-content');
+            contentDiv.innerHTML = rootNode.innerHTML + readMoreBtn;
+            contentDiv.style.display = 'block';
+        }
+
+        function changeDashboardImage(index, btnElement) {
+            const imgEl = document.getElementById('dash-main-img');
+            const targetUrl = characterImages[index].url;
+            
+            imgEl.style.opacity = '0';
+            setTimeout(() => {
+                imgEl.src = targetUrl;
+                imgEl.onerror = () => { imgEl.src = 'https://via.placeholder.com/350x450?text=圖片載入失敗'; };
+                imgEl.onload = () => { imgEl.style.opacity = '1'; };
+            }, 150);
+
+            if(btnElement) {
+                document.querySelectorAll('.img-btn').forEach(b => b.classList.remove('active'));
+                btnElement.classList.add('active');
+            }
+        }
+
+        document.getElementById('dash-main-img').addEventListener('click', function() {
+            if(this.src && !this.src.includes('placeholder')) {
+                document.getElementById('lightbox-img').src = this.src;
+                document.getElementById('lightbox').style.display = 'flex';
+            }
+        });
+        document.getElementById('lightbox').addEventListener('click', function() {
+            this.style.display = 'none';
+        });
+
+    </script>
+</body>
+</html>
