@@ -21,7 +21,7 @@
     <h1>🗡️ FF14 灰機 Wiki 快速查詢</h1>
     
     <div class="search-container">
-        <input type="text" id="searchInput" placeholder="請輸入關鍵字（例如：拂曉血盟、曼城茶座...）" value="拂曉血盟">
+        <input type="text" id="searchInput" placeholder="請輸入關鍵字（例如：拂曉血盟、曼城茶座...）" value="薩雷安">
         <button id="searchBtn">搜尋</button>
     </div>
 
@@ -49,21 +49,20 @@
         };
 
         async function fetchWikiData(keyword, s2tConverter, t2sConverter) {
-            async function fetchWikiData(keyword, s2tConverter, t2sConverter) {
             const resultDiv = document.getElementById('result');
+            
+            // 搜尋前：將你輸入的繁體關鍵字轉換為簡體
             const searchKeyword = t2sConverter(keyword);
             
             resultDiv.innerHTML = `<span class="loading">正在呼叫 Vercel 後端以太之光...<br>(實際送出搜尋條目：${searchKeyword})</span>`;
 
             try {
-                // ★ 關鍵改變：改成呼叫我們剛剛建立的 Vercel 後端 API ★
+                // 呼叫我們自己建立的 Vercel 後端 API
                 const response = await fetch(`/api/wiki?keyword=${encodeURIComponent(searchKeyword)}`);
                 
-                if (!response.ok) throw new Error(`後端回應錯誤：${response.status}`);
+                if (!response.ok) throw new Error(`後端回應錯誤狀態：${response.status}`);
 
                 const data = await response.json();
-                
-                // 解析回傳的 Wiki JSON
                 const pages = data.query.pages;
                 const pageId = Object.keys(pages)[0];
 
@@ -79,7 +78,7 @@
                     return;
                 }
 
-                // 將簡體內容轉回繁體並顯示
+                // 將簡體內容轉回繁體
                 const traditionalContent = s2tConverter(simplifiedContent);
                 resultDiv.innerHTML = traditionalContent.replace(/\n/g, '<br><br>');
 
@@ -88,9 +87,7 @@
                 resultDiv.innerHTML = `<span class="error">連線發生錯誤：${error.message}</span>`;
             }
         }
-        }
     </script>
 
 </body>
 </html>
-
