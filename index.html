@@ -12,7 +12,7 @@
         button { padding: 10px 20px; font-size: 16px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s; }
         button:hover { background-color: #45a049; }
         #result { background-color: white; padding: 20px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); min-height: 100px; line-height: 1.6; }
-        .loading { color: #666; font-style: italic; }
+        .loading { color: #8a2be2; font-style: italic; font-weight: bold; }
         .error { color: #d32f2f; font-weight: bold; }
     </style>
 </head>
@@ -21,7 +21,7 @@
     <h1>🗡️ FF14 灰機 Wiki 快速查詢</h1>
     
     <div class="search-container">
-        <input type="text" id="searchInput" placeholder="請輸入關鍵字（例如：拂曉血盟、薩雷安...）" value="薩雷安">
+        <input type="text" id="searchInput" placeholder="請輸入關鍵字（例如：拂曉血盟、勞班...）" value="塔塔露">
         <button id="searchBtn">搜尋</button>
     </div>
 
@@ -48,13 +48,39 @@
             }
         };
 
+        // ★ 古老魔法：JSONP 請求函式 ★
+        function fetchJsonp(url) {
+            return new Promise((resolve, reject) => {
+                // 隨機產生一個回呼函式的名稱
+                const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
+                
+                // 定義當資料回來時要執行的動作
+                window[callbackName] = function(data) {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    resolve(data); // 成功拿到資料
+                };
+
+                // 動態建立一個 <script> 標籤來騙過瀏覽器
+                const script = document.createElement('script');
+                script.src = url + '&callback=' + callbackName;
+                script.onerror = () => {
+                    delete window[callbackName];
+                    document.body.removeChild(script);
+                    reject(new Error('JSONP 請求被阻擋或失敗'));
+                };
+                
+                // 把標籤塞進網頁，正式發動請求
+                document.body.appendChild(script);
+            });
+        }
+
         async function fetchWikiData(keyword, s2tConverter, t2sConverter) {
             const resultDiv = document.getElementById('result');
             const searchKeyword = t2sConverter(keyword);
             
-            resultDiv.innerHTML = `<span class="loading">正在發動超越之力直接讀取資料...<br>(實際送出搜尋條目：${searchKeyword})</span>`;
+            resultDiv.innerHTML = `<span class="loading">正在詠唱古老魔法 JSONP 繞過防護網...<br>(實際送出搜尋條目：${searchKeyword})</span>`;
 
-            // 關鍵修改：我們直接用瀏覽器呼叫官方 API，並帶上 origin=* 宣告我們的正式網址
             const baseUrl = "https://ff14.huijiwiki.com/api.php";
             const params = new URLSearchParams({
                 action: "query",
@@ -62,17 +88,14 @@
                 prop: "extracts",
                 exintro: "",       
                 explaintext: "",   
-                titles: searchKeyword,
-                origin: "*"        // 這是 MediaWiki 專屬的跨域通行證
+                titles: searchKeyword
+                // 注意：這裡移除了 origin=*，因為 JSONP 不需要它
             });
 
             try {
-                // 直接抓取！
-                const response = await fetch(`${baseUrl}?${params.toString()}`);
+                // 放棄 fetch，改用我們寫好的 JSONP 魔法！
+                const data = await fetchJsonp(`${baseUrl}?${params.toString()}`);
                 
-                if (!response.ok) throw new Error(`伺服器回應錯誤狀態：${response.status}`);
-
-                const data = await response.json();
                 const pages = data.query.pages;
                 const pageId = Object.keys(pages)[0];
 
@@ -88,13 +111,12 @@
                     return;
                 }
 
-                // 將簡體內容轉回繁體
                 const traditionalContent = s2tConverter(simplifiedContent);
                 resultDiv.innerHTML = traditionalContent.replace(/\n/g, '<br><br>');
 
             } catch (error) {
                 console.error("抓取失敗:", error);
-                resultDiv.innerHTML = `<span class="error">連線發生錯誤：${error.message}</span>`;
+                resultDiv.innerHTML = `<span class="error">魔法發動失敗：${error.message}</span>`;
             }
         }
     </script>
