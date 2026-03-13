@@ -9,7 +9,7 @@
         /* === 🌐 基礎設定 === */
         body { font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif; background-color: #f1f5f9; color: #1e293b; max-width: 1200px; margin: 30px auto; padding: 20px; }
         h1 { text-align: center; color: #0f172a; margin-bottom: 20px; font-weight: 900; letter-spacing: 1px; }
-        .version-tag { font-size: 14px; color: #b91c1c; font-weight: bold; vertical-align: middle; background: #fee2e2; padding: 4px 10px; border-radius: 8px; border: 1px solid #f87171; }
+        .version-tag { font-size: 14px; color: #4338ca; font-weight: bold; vertical-align: middle; background: #e0e7ff; padding: 4px 10px; border-radius: 8px; border: 1px solid #818cf8; }
         
         /* === 🔍 搜尋列 === */
         .find-panel { display: flex; gap: 10px; margin-bottom: 30px; justify-content: center; }
@@ -26,33 +26,27 @@
            ⭐️ 絕對還原「附圖三」的藍圖框線排版 ⭐️
            ========================================= */
         #blueprint-container {
-            display: none; /* 載入前隱藏 */
+            display: none; 
             background: #ffffff;
-            border: 2px solid #0f172a; /* 最外層大黑框 */
+            border: 2px solid #0f172a; /* 你的手繪外框 */
             padding: 30px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.1);
         }
 
-        /* 上半部：左右兩欄 */
         .bp-top-row {
             display: flex;
             flex-direction: row;
             gap: 25px;
-            align-items: stretch; /* 讓左右等高 */
+            align-items: stretch;
             margin-bottom: 25px;
         }
 
-        /* 💡 左欄：包含「人物照片區」與「按鈕區」 */
-        .bp-left-col {
-            flex: 0 0 360px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
+        /* 💡 左欄：照片區 + 按鈕區 */
+        .bp-left-col { flex: 0 0 360px; display: flex; flex-direction: column; gap: 20px; }
 
         /* 照片框 */
         .bp-img-box {
-            border: 2px solid #0f172a; /* 照片外框 */
+            border: 2px solid #0f172a; 
             height: 450px;
             background: #f8fafc;
             display: flex;
@@ -61,37 +55,30 @@
             padding: 10px;
             position: relative;
         }
-        .bp-img-box img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-            cursor: zoom-in;
-            transition: opacity 0.3s;
-        }
-        /* 照片標題標籤 */
-        .bp-img-title { position: absolute; top: -12px; left: 15px; background: white; padding: 0 8px; font-weight: 900; color: #0f172a; font-size: 16px; }
+        .bp-img-box img { max-width: 100%; max-height: 100%; object-fit: contain; cursor: zoom-in; transition: opacity 0.3s; }
+        .bp-img-title { position: absolute; top: -14px; left: 15px; background: white; padding: 0 8px; font-weight: 900; color: #0f172a; font-size: 16px; }
 
-        /* 按鈕框 */
+        /* 版本按鈕框 */
         .bp-btn-box {
-            border: 2px solid #0f172a; /* 按鈕外框 */
-            padding: 20px 15px;
+            border: 2px solid #0f172a; 
+            padding: 25px 15px 15px 15px;
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
             justify-content: center;
             position: relative;
         }
-        .bp-btn-title { position: absolute; top: -12px; left: 15px; background: white; padding: 0 8px; font-weight: 900; color: #0f172a; font-size: 16px; }
+        .bp-btn-title { position: absolute; top: -14px; left: 15px; background: white; padding: 0 8px; font-weight: 900; color: #0f172a; font-size: 16px; }
         
-        .bp-btn { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold; color: #334155; transition: 0.2s; font-size: 13px; }
+        .bp-btn { background: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; color: #334155; transition: 0.2s; font-size: 14px; }
         .bp-btn:hover { background: #e2e8f0; }
-        .bp-btn.active { background: #4f46e5; color: white; border-color: #4f46e5; }
+        .bp-btn.active { background: #4f46e5; color: white; border-color: #4f46e5; box-shadow: 0 4px 6px rgba(79,70,229,0.2); }
 
-        /* 💡 右欄：角色與相關信息 (逐列呈現) */
+        /* 💡 右欄：角色與相關信息 */
         .bp-right-col {
             flex: 1;
-            border: 2px solid #0f172a; /* 右側大框 */
-            padding: 25px;
+            border: 2px solid #0f172a; 
+            padding: 30px 25px;
             position: relative;
             background: #ffffff;
             overflow-y: auto;
@@ -99,15 +86,14 @@
         }
         .bp-right-col::-webkit-scrollbar { width: 6px; }
         .bp-right-col::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .bp-info-title { position: absolute; top: -14px; left: 15px; background: white; padding: 0 8px; font-weight: 900; color: #0f172a; font-size: 16px; }
         
-        .bp-info-title { position: absolute; top: -12px; left: 15px; background: white; padding: 0 8px; font-weight: 900; color: #0f172a; font-size: 18px; }
-        
-        .info-group { font-size: 17px; font-weight: bold; color: #4f46e5; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin: 20px 0 10px 0; }
+        .info-group { font-size: 18px; font-weight: bold; color: #4f46e5; border-bottom: 2px solid #e2e8f0; padding-bottom: 5px; margin: 20px 0 10px 0; }
         .info-group:first-child { margin-top: 0; }
-        .info-row { display: flex; padding: 10px 0; border-bottom: 1px dashed #e2e8f0; font-size: 15px; }
+        .info-row { display: flex; padding: 12px 0; border-bottom: 1px dashed #e2e8f0; font-size: 15px; line-height: 1.6;}
         .info-row:last-child { border-bottom: none; }
         .info-lbl { flex: 0 0 130px; font-weight: 900; color: #64748b; }
-        .info-val { flex: 1; color: #1e293b; line-height: 1.5; }
+        .info-val { flex: 1; color: #1e293b; }
         .info-val a { color: #3b82f6; text-decoration: none; font-weight: bold; }
         .info-val a:hover { text-decoration: underline; }
 
@@ -115,22 +101,20 @@
 
         /* 💡 下半部：人物詳細資料 */
         .bp-bottom-row {
-            border: 2px solid #0f172a; /* 下方大框 */
+            border: 2px solid #0f172a; 
             padding: 30px;
             position: relative;
             background: #ffffff;
             line-height: 1.8;
             font-size: 16px;
         }
-        .bp-bottom-title { position: absolute; top: -12px; left: 15px; background: white; padding: 0 8px; font-weight: 900; color: #0f172a; font-size: 18px; }
+        .bp-bottom-title { position: absolute; top: -14px; left: 15px; background: white; padding: 0 8px; font-weight: 900; color: #0f172a; font-size: 16px; }
 
-        /* 內部文章表格防破版 */
         #wiki-content table { width: 100%; border-collapse: collapse; margin: 15px 0; }
         #wiki-content th, #wiki-content td { border: 1px solid #cbd5e1; padding: 10px; }
         #wiki-content th { background: #f8fafc; }
         #wiki-content img { max-width: 100%; height: auto; border-radius: 8px; margin: 10px 0; cursor: zoom-in; }
         
-        /* 極度暴力隱藏無用元素 */
         .navbox, .mw-editsection, .noprint, .toc, .pi-header { display: none !important; }
         
         .read-more { display: block; margin-top: 30px; text-align: center; font-size: 16px; font-weight: bold; padding: 15px; background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 12px; color: #475569; text-decoration: none; }
@@ -147,7 +131,7 @@
 </head>
 <body>
 
-    <h1>🗡️ FF14 角色資訊面板 <span class="version-tag">(v15 完美藍圖實裝版)</span></h1>
+    <h1>🗡️ FF14 角色資訊面板 <span class="version-tag">(v1666 絕對領域實裝版)</span></h1>
     
     <div class="find-panel">
         <input type="text" id="findInput" placeholder="請輸入關鍵字（例如：塔塔露...）" value="塔塔露">
@@ -171,7 +155,7 @@
             </div>
             
             <div class="bp-right-col">
-                <div class="bp-info-title">角色信息 / 相關信息 逐列呈現</div>
+                <div class="bp-info-title">角色信息、相關信息逐列式呈現</div>
                 <div id="dash-right"></div>
             </div>
         </div>
@@ -204,7 +188,7 @@
             function triggerSearch() {
                 const keyword = input.value.trim();
                 if (!keyword) return;
-                statusMsg.innerHTML = `<div class="loading">🟢 啟動四重突破協議，正在連接...</div>`;
+                statusMsg.innerHTML = `<div class="loading">🟢 啟動掃描協議，正在連接...</div>`;
                 bpContainer.style.display = 'none';
                 executeDashboardBuild(keyword);
             }
@@ -260,11 +244,11 @@
                         return;
                     }
 
-                    statusMsg.innerHTML = `<div class="loading">🔨 突破成功！正在渲染藍圖排版...</div>`;
+                    statusMsg.innerHTML = `<div class="loading">🔨 資料取得！正在進行全域掃描與渲染排版...</div>`;
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(data.parse.text['*'], 'text/html');
 
-                    // 拔除跳轉
+                    // 1. 物理剝除超連結，防止跳轉
                     doc.querySelectorAll('a').forEach(a => {
                         const img = a.querySelector('img');
                         if (img) { a.parentNode.insertBefore(img, a); a.remove(); } 
@@ -275,17 +259,22 @@
                         }
                     });
 
-                    // 🗑️ 核心除草機：找出所有的「版本切換群組」並徹底刪除，防止文字掉到下面！
+                    // ==========================================
+                    // ⭐️ 核心技術：全域畫廊提取與毀屍滅跡系統 ⭐️
+                    // ==========================================
                     characterImages = [];
                     const addedUrls = new Set(); 
                     
-                    // 尋找 Wiki 的隱藏頁籤外殼
-                    doc.querySelectorAll('.huiji-tabs, .tabber, .pi-image-collection').forEach(wrapper => {
-                        // 抓出按鈕文字
-                        let navItems = wrapper.querySelectorAll('li, .tabbernav a');
-                        // 抓出圖片
-                        let panes = wrapper.querySelectorAll('.tab-pane, .tabbertab, .pi-image-collection-tab-content');
+                    // 掃描全網頁中所有的頁籤/畫廊元件 (包含文章區與資訊框)
+                    const galleries = doc.querySelectorAll('.huiji-tabs, .tabber, .pi-image-collection');
+                    
+                    galleries.forEach(gallery => {
+                        // 抓出導航按鈕的文字 (這就是"重生之境"等文字的來源)
+                        let navItems = gallery.querySelectorAll('.nav-tabs li, .tabbernav a, .pi-image-collection-tabs li');
+                        // 抓出對應的內容區塊
+                        let panes = gallery.querySelectorAll('.tab-pane, .tabbertab, .pi-image-collection-tab-content');
                         
+                        let foundImages = false;
                         panes.forEach((pane, idx) => {
                             let img = pane.querySelector('img');
                             if(img) {
@@ -294,23 +283,30 @@
                                 if(navItems[idx]) label = navItems[idx].textContent.trim();
                                 else if (pane.getAttribute('title')) label = pane.getAttribute('title');
                                 
-                                if(src && !addedUrls.has(src)) { addedUrls.add(src); characterImages.push({url: src, label}); }
+                                if(src && !addedUrls.has(src)) { 
+                                    addedUrls.add(src); 
+                                    characterImages.push({url: src, label}); 
+                                    foundImages = true;
+                                }
                             }
                         });
-                        // ⚠️ 關鍵：抓完圖片和文字後，直接把整個群組「連根拔起」刪除！
-                        wrapper.remove(); 
+                        
+                        // ⚠️ 最重要的一步：只要這個群組裡有圖片，我們抽完資料後，就把整個群組「物理刪除」！
+                        // 這樣那些 "重生之境" 的文字就絕對不可能掉到下方的文章區塊了！
+                        if (foundImages) gallery.remove(); 
                     });
 
-                    // 清除可能殘留的清單導航
-                    doc.querySelectorAll('ul.nav, ul.nav-tabs, .huiji-tabs-nav').forEach(e => e.remove());
+                    // 移除多餘的編輯按鈕
                     doc.querySelectorAll('.mw-editsection, .noprint, style, script').forEach(e => e.remove());
 
-                    // 解析資訊框
+                    // ==========================================
+                    // 解析右側資訊框
+                    // ==========================================
                     const infobox = doc.querySelector('.infobox, .portable-infobox, table[class*="infobox"]');
                     let rightPanelHtml = '';
 
                     if (infobox) {
-                        // 撿漏剩下的圖片
+                        // 撿漏：如果還有沒被全域掃描抓走的散落圖片
                         infobox.querySelectorAll('img').forEach(img => {
                             let src = getHighResUrl(img);
                             if(src && !addedUrls.has(src)) {
@@ -347,15 +343,20 @@
                                 }
                             }
                         });
+                        // 資訊框解析完畢，也將其物理刪除
                         infobox.remove(); 
                     }
 
                     if (characterImages.length === 0) characterImages.push({ url: 'https://via.placeholder.com/350x450?text=無圖片', label: '預設' });
 
-                    // 渲染右側
+                    // ==========================================
+                    // 渲染到畫面
+                    // ==========================================
+                    
+                    // 1. 渲染右側資料
                     document.getElementById('dash-right').innerHTML = s2tConverter(rightPanelHtml) || '<div class="info-row">無詳細資料</div>';
                     
-                    // 渲染左側按鈕
+                    // 2. 渲染左側切換按鈕
                     const controlsContainer = document.getElementById('dash-img-controls');
                     controlsContainer.innerHTML = '';
                     characterImages.forEach((imgObj, index) => {
@@ -367,7 +368,7 @@
                     });
                     changeDashboardImage(0, controlsContainer.firstChild);
 
-                    // 渲染下方文章
+                    // 3. 渲染下方文章
                     function translateTextNodes(node) {
                         if (node.nodeType === 3) node.nodeValue = s2tConverter(node.nodeValue);
                         else if (node.nodeType === 1 && node.nodeName !== 'SCRIPT' && node.nodeName !== 'STYLE') {
@@ -382,7 +383,7 @@
                     const readMoreBtn = `<a href="${wikiUrl}" target="_blank" class="read-more">🔗 前往原站閱讀完整條目</a>`;
                     document.getElementById('wiki-content').innerHTML = rootNode.innerHTML + readMoreBtn;
                     
-                    bpContainer.style.display = 'block'; // 顯示終極藍圖面板
+                    bpContainer.style.display = 'block'; 
 
                 } catch (error) {
                     document.getElementById('status-msg').innerHTML = `<div class="error">發生錯誤：${error.message}</div>`;
@@ -404,7 +405,7 @@
                 }
             };
 
-            // 燈箱
+            // 全局燈箱
             document.addEventListener('click', function(e) {
                 if (e.target.tagName === 'IMG' && e.target.id !== 'lightbox-img') {
                     e.preventDefault(); e.stopPropagation();
