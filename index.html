@@ -49,29 +49,21 @@
         };
 
         async function fetchWikiData(keyword, s2tConverter, t2sConverter) {
+            async function fetchWikiData(keyword, s2tConverter, t2sConverter) {
             const resultDiv = document.getElementById('result');
             const searchKeyword = t2sConverter(keyword);
             
-            resultDiv.innerHTML = `<span class="loading">正在前往以太之光讀取資料...<br>(實際送出搜尋條目：${searchKeyword})</span>`;
-
-            // 直接呼叫官方 API，加上 origin=* 準備在 Vercel 上使用
-            const baseUrl = "https://ff14.huijiwiki.com/api.php";
-            const params = new URLSearchParams({
-                action: "query",
-                format: "json",
-                prop: "extracts",
-                exintro: "",       
-                explaintext: "",   
-                titles: searchKeyword,
-                origin: "*"        
-            });
+            resultDiv.innerHTML = `<span class="loading">正在呼叫 Vercel 後端以太之光...<br>(實際送出搜尋條目：${searchKeyword})</span>`;
 
             try {
-                const response = await fetch(`${baseUrl}?${params.toString()}`);
+                // ★ 關鍵改變：改成呼叫我們剛剛建立的 Vercel 後端 API ★
+                const response = await fetch(`/api/wiki?keyword=${encodeURIComponent(searchKeyword)}`);
                 
-                if (!response.ok) throw new Error(`伺服器回應錯誤狀態：${response.status}`);
+                if (!response.ok) throw new Error(`後端回應錯誤：${response.status}`);
 
                 const data = await response.json();
+                
+                // 解析回傳的 Wiki JSON
                 const pages = data.query.pages;
                 const pageId = Object.keys(pages)[0];
 
@@ -87,6 +79,7 @@
                     return;
                 }
 
+                // 將簡體內容轉回繁體並顯示
                 const traditionalContent = s2tConverter(simplifiedContent);
                 resultDiv.innerHTML = traditionalContent.replace(/\n/g, '<br><br>');
 
@@ -95,7 +88,9 @@
                 resultDiv.innerHTML = `<span class="error">連線發生錯誤：${error.message}</span>`;
             }
         }
+        }
     </script>
 
 </body>
 </html>
+
