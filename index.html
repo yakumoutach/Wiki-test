@@ -5,48 +5,226 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="referrer" content="no-referrer">
-<title>FF14 角色專屬資訊卡</title>
+
+<title>FF14 角色資訊面板</title>
 
 <style>
-body{font-family:'Segoe UI','Microsoft JhengHei',sans-serif;background:#f8fafc;color:#1e293b;max-width:1200px;margin:30px auto;padding:20px}
-h1{text-align:center;font-weight:900}
-.version-tag{font-size:14px;color:#6d28d9;font-weight:bold;background:#ede9fe;padding:4px 10px;border-radius:8px;border:1px solid #c4b5fd}
 
-.find-panel{display:flex;gap:10px;margin-bottom:30px;justify-content:center}
-#findInput{width:100%;max-width:500px;padding:14px 20px;font-size:16px;border:2px solid #cbd5e1;border-radius:12px}
-#findBtn{padding:14px 30px;font-size:16px;background:#4f46e5;color:white;border:none;border-radius:12px;cursor:pointer}
+body{
+font-family:'Segoe UI','Microsoft JhengHei',sans-serif;
+background:#f8fafc;
+color:#1e293b;
+max-width:1200px;
+margin:30px auto;
+padding:20px
+}
 
-.sys-msg{background:white;padding:20px;border-radius:12px;text-align:center;font-weight:bold}
+h1{
+text-align:center;
+font-weight:900
+}
 
-#blueprint-container{display:none;background:white;border:2px solid #0f172a;padding:30px}
+.version-tag{
+font-size:14px;
+color:#6d28d9;
+font-weight:bold;
+background:#ede9fe;
+padding:4px 10px;
+border-radius:8px;
+border:1px solid #c4b5fd
+}
 
-.bp-top-row{display:flex;gap:25px;margin-bottom:25px}
+.find-panel{
+display:flex;
+gap:10px;
+margin-bottom:30px;
+justify-content:center
+}
 
-.bp-left-col{flex:0 0 360px;display:flex;flex-direction:column;gap:20px}
+#findInput{
+width:100%;
+max-width:500px;
+padding:14px 20px;
+font-size:16px;
+border:2px solid #cbd5e1;
+border-radius:12px
+}
 
-.bp-img-box{border:2px solid #0f172a;height:450px;display:flex;align-items:center;justify-content:center;position:relative}
-.bp-img-box img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-in}
-.bp-img-title{position:absolute;top:-14px;left:15px;background:white;padding:0 8px;font-weight:900}
+#findBtn{
+padding:14px 30px;
+font-size:16px;
+background:#4f46e5;
+color:white;
+border:none;
+border-radius:12px;
+cursor:pointer
+}
 
-.bp-btn-box{border:2px solid #0f172a;padding:25px 15px 15px 15px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;position:relative;background:#f8fafc}
-.bp-btn-title{position:absolute;top:-14px;left:15px;background:white;padding:0 8px;font-weight:900}
+.sys-msg{
+background:white;
+padding:20px;
+border-radius:12px;
+text-align:center;
+font-weight:bold
+}
 
-.bp-btn{background:#fff;border:1px solid #cbd5e1;padding:8px 12px;border-radius:6px;cursor:pointer;font-weight:bold}
-.bp-btn.active{background:#4f46e5;color:white}
+#blueprint-container{
+display:none;
+background:white;
+border:2px solid #0f172a;
+padding:30px
+}
 
-.bp-right-col{flex:1;border:2px solid #0f172a;padding:25px;position:relative;overflow-y:auto;max-height:550px}
-.bp-info-title{position:absolute;top:-14px;left:15px;background:white;padding:0 8px;font-weight:900}
+.bp-top-row{
+display:flex;
+gap:25px;
+margin-bottom:25px
+}
 
-.info-row{display:flex;padding:10px 0;border-bottom:1px dashed #e2e8f0}
-.info-lbl{flex:0 0 120px;font-weight:900}
-.info-val{flex:1}
+.bp-left-col{
+flex:0 0 360px;
+display:flex;
+flex-direction:column;
+gap:20px
+}
 
-.bp-bottom-row{border:2px solid #0f172a;padding:30px;position:relative;margin-top:25px}
-.bp-bottom-title{position:absolute;top:-14px;left:15px;background:white;padding:0 8px;font-weight:900}
+.bp-img-box{
+border:2px solid #0f172a;
+height:450px;
+display:flex;
+align-items:center;
+justify-content:center;
+position:relative
+}
 
-#lightbox{display:none;position:fixed;z-index:999999;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.92);align-items:center;justify-content:center;flex-direction:column}
-#lightbox img{max-width:90%;max-height:85vh;border:3px solid #fff}
-#lightbox-close{color:white;margin-top:25px;padding:10px 30px;background:rgba(255,255,255,0.2);border-radius:30px;cursor:pointer}
+.bp-img-box img{
+max-width:100%;
+max-height:100%;
+object-fit:contain;
+cursor:zoom-in
+}
+
+.bp-img-title{
+position:absolute;
+top:-14px;
+left:15px;
+background:white;
+padding:0 8px;
+font-weight:900
+}
+
+.bp-btn-box{
+border:2px solid #0f172a;
+padding:25px 15px 15px 15px;
+display:flex;
+flex-wrap:wrap;
+gap:8px;
+justify-content:center;
+position:relative;
+background:#f8fafc
+}
+
+.bp-btn-title{
+position:absolute;
+top:-14px;
+left:15px;
+background:white;
+padding:0 8px;
+font-weight:900
+}
+
+.bp-btn{
+background:#fff;
+border:1px solid #cbd5e1;
+padding:8px 12px;
+border-radius:6px;
+cursor:pointer;
+font-weight:bold
+}
+
+.bp-btn.active{
+background:#4f46e5;
+color:white
+}
+
+.bp-right-col{
+flex:1;
+border:2px solid #0f172a;
+padding:25px;
+position:relative;
+overflow-y:auto;
+max-height:550px
+}
+
+.bp-info-title{
+position:absolute;
+top:-14px;
+left:15px;
+background:white;
+padding:0 8px;
+font-weight:900
+}
+
+.info-row{
+display:flex;
+padding:10px 0;
+border-bottom:1px dashed #e2e8f0
+}
+
+.info-lbl{
+flex:0 0 120px;
+font-weight:900
+}
+
+.info-val{
+flex:1
+}
+
+.bp-bottom-row{
+border:2px solid #0f172a;
+padding:30px;
+position:relative;
+margin-top:25px
+}
+
+.bp-bottom-title{
+position:absolute;
+top:-14px;
+left:15px;
+background:white;
+padding:0 8px;
+font-weight:900
+}
+
+#lightbox{
+display:none;
+position:fixed;
+z-index:999999;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.92);
+align-items:center;
+justify-content:center;
+flex-direction:column
+}
+
+#lightbox img{
+max-width:90%;
+max-height:85vh;
+border:3px solid #fff
+}
+
+#lightbox-close{
+color:white;
+margin-top:25px;
+padding:10px 30px;
+background:rgba(255,255,255,0.2);
+border-radius:30px;
+cursor:pointer
+}
+
 </style>
 
 </head>
@@ -107,17 +285,78 @@ let characterImages=[]
 
 document.getElementById("findBtn").onclick=triggerSearch
 
+document.getElementById("findInput").addEventListener("keypress",e=>{
+if(e.key==="Enter")triggerSearch()
+})
+
+/* =========================
+   CORS突破 fetch
+========================= */
+
+async function superFetch(searchKeyword){
+
+const targetUrl=`https://ff14.huijiwiki.com/api.php?action=parse&format=json&page=${encodeURIComponent(searchKeyword)}&redirects=1&prop=text`
+
+const isValid=(d)=>d&&(d.parse||(d.error&&d.error.code==="missingtitle"))
+
+function fetchJsonp(url){
+return new Promise((resolve,reject)=>{
+
+const callbackName="jsonp_"+Math.random().toString(36).substring(7)
+
+window[callbackName]=(data)=>{
+delete window[callbackName]
+document.body.removeChild(script)
+resolve(data)
+}
+
+const script=document.createElement("script")
+script.src=url+"&callback="+callbackName
+script.onerror=()=>reject()
+
+document.body.appendChild(script)
+
+})
+}
+
+try{
+let data=await fetchJsonp(targetUrl)
+if(isValid(data))return data
+}catch(e){}
+
+try{
+let res=await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`)
+let data=await res.json()
+if(isValid(data))return data
+}catch(e){}
+
+try{
+let res=await fetch(`https://corsproxy.io/?${encodeURIComponent(targetUrl)}`)
+let data=await res.json()
+if(isValid(data))return data
+}catch(e){}
+
+try{
+let res=await fetch(targetUrl+"&origin=*")
+let data=await res.json()
+if(isValid(data))return data
+}catch(e){}
+
+throw new Error("伺服器阻擋")
+
+}
+
+/* ========================= */
+
 async function triggerSearch(){
 
-let keyword=document.getElementById("findInput").value
+let keyword=document.getElementById("findInput").value.trim()
 
-document.getElementById("status-msg").innerHTML="搜尋中..."
+if(!keyword)return
 
-let url=`https://ff14.huijiwiki.com/api.php?action=parse&format=json&page=${encodeURIComponent(keyword)}&redirects=1&prop=text&origin=*`
+document.getElementById("status-msg").innerHTML='<div class="sys-msg">🟢 正在搜尋角色...</div>'
 
-let res=await fetch(url)
-
-let data=await res.json()
+let data=await superFetch(keyword)
 
 if(data.error){
 document.getElementById("status-msg").innerHTML="找不到角色"
@@ -128,7 +367,7 @@ let parser=new DOMParser()
 let doc=parser.parseFromString(data.parse.text["*"],"text/html")
 
 /* =========================
-   Global Harvester 穩定版
+   Global Harvester
 ========================= */
 
 let fallbackLabels=[]
@@ -140,9 +379,7 @@ ul.querySelectorAll("li,a").forEach(item=>{
 let lbl=item.textContent.trim()
 
 if(lbl && lbl.length<=15 && !/[，。！？]/.test(lbl)){
-if(!fallbackLabels.includes(lbl)){
-fallbackLabels.push(lbl)
-}
+if(!fallbackLabels.includes(lbl))fallbackLabels.push(lbl)
 }
 
 })
@@ -183,13 +420,9 @@ let pane=img.closest(".tab-pane,.tabbertab,.pi-image-collection-tab-content")
 
 if(pane){
 
-if(pane.getAttribute("title")){
-label=pane.getAttribute("title").trim()
-}
+if(pane.getAttribute("title"))label=pane.getAttribute("title").trim()
 
-if(!label && pane.getAttribute("data-title")){
-label=pane.getAttribute("data-title").trim()
-}
+if(!label && pane.getAttribute("data-title"))label=pane.getAttribute("data-title").trim()
 
 }
 
@@ -197,9 +430,7 @@ if(!label){
 
 let alt=img.getAttribute("alt")
 
-if(alt && alt.length<=15){
-label=alt
-}
+if(alt && alt.length<=15)label=alt
 
 }
 
@@ -232,16 +463,20 @@ renderImages()
 
 document.getElementById("blueprint-container").style.display="block"
 
+document.getElementById("status-msg").innerHTML=""
+
 }
 
 function renderImages(){
 
 let controls=document.getElementById("dash-img-controls")
+
 controls.innerHTML=""
 
 characterImages.forEach((img,i)=>{
 
 let btn=document.createElement("button")
+
 btn.className="bp-btn"
 
 btn.innerText=img.label
@@ -261,9 +496,12 @@ function changeImage(i){
 document.getElementById("dash-main-img").src=characterImages[i].url
 
 document.querySelectorAll(".bp-btn").forEach(b=>b.classList.remove("active"))
+
 document.querySelectorAll(".bp-btn")[i].classList.add("active")
 
 }
+
+/* lightbox */
 
 document.addEventListener("click",e=>{
 
