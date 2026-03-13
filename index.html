@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+    
     <title>FF14 灰機 Wiki 快速查詢</title>
     <script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js"></script>
     <style>
@@ -16,7 +18,6 @@
         .error { color: #d32f2f; font-weight: bold; }
         
         /* === Wiki 專屬 CSS 終極修復 === */
-        
         /* 1. 角色資訊框 (Infobox) */
         .infobox { float: right; width: 320px; background: #f9f9f9; border: 1px solid #aaa; padding: 10px; margin: 0 0 15px 20px; font-size: 13px; }
         .infobox th { background-color: #e0e0e0; text-align: center; padding: 5px; }
@@ -27,7 +28,7 @@
         table.wikitable th, table.wikitable td { border: 1px solid #a2a9b1; padding: 8px; }
         table.wikitable th { background-color: #eaecf0; text-align: center; }
         
-        /* 3. ★ 畫廊 (Gallery) 排版修復 ★ */
+        /* 3. 畫廊 (Gallery) 排版修復 */
         ul.gallery { display: flex; flex-wrap: wrap; padding: 0; margin: 15px 0; list-style-type: none; justify-content: flex-start; }
         li.gallerybox { margin: 10px; text-align: center; width: auto !important; }
         li.gallerybox .thumb { border: 1px solid #ccc; background-color: #f9f9f9; padding: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
@@ -96,7 +97,7 @@
             const resultDiv = document.getElementById('result');
             const searchKeyword = t2sConverter(keyword);
             
-            resultDiv.innerHTML = `<span class="loading">正在搬運並精密修復網頁資料...</span>`;
+            resultDiv.innerHTML = `<span class="loading">正在搬運並解除圖片封印...</span>`;
 
             const baseUrl = "https://ff14.huijiwiki.com/api.php";
             const params = new URLSearchParams({
@@ -121,7 +122,7 @@
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(htmlContent, 'text/html');
 
-                // 🔧 核心修復 1：圖片路徑修復 (解除 Lazy Load)
+                // 🔧 圖片路徑修復 (解除 Lazy Load)
                 doc.querySelectorAll('img').forEach(img => {
                     let realSrc = img.getAttribute('data-src') || img.getAttribute('data-lazy-src') || img.getAttribute('src');
                     if (realSrc) {
@@ -133,7 +134,7 @@
                     img.removeAttribute('srcset');
                 });
 
-                // 🔧 核心修復 2：超連結路徑修復
+                // 🔧 超連結路徑修復
                 doc.querySelectorAll('a').forEach(a => {
                     let href = a.getAttribute('href');
                     if (href && href.startsWith('/')) {
@@ -142,13 +143,11 @@
                     a.target = '_blank';
                 });
 
-                // 🔧 核心修復 3：外科手術級「安全翻譯」
-                // 這個函數會像爬樹一樣，只找「文字」來翻譯，絕對不碰 HTML 標籤跟網址！
+                // 🔧 外科研發級「安全翻譯」 (只翻譯文字，不碰圖片連結)
                 function translateTextNodes(node) {
-                    if (node.nodeType === 3) { // 如果是純文字節點
+                    if (node.nodeType === 3) { 
                         node.nodeValue = s2tConverter(node.nodeValue);
-                    } else if (node.nodeType === 1) { // 如果是 HTML 標籤
-                        // 避開 <script> 和 <style> 標籤不翻譯
+                    } else if (node.nodeType === 1) { 
                         if (node.nodeName !== 'SCRIPT' && node.nodeName !== 'STYLE') {
                             node.childNodes.forEach(child => translateTextNodes(child));
                         }
