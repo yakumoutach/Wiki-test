@@ -10,7 +10,7 @@
         /* === 🌐 基礎設定 === */
         body { font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif; background-color: #f1f5f9; color: #1e293b; max-width: 1200px; margin: 30px auto; padding: 20px; }
         h1 { text-align: center; color: #0f172a; margin-bottom: 20px; font-weight: 900; letter-spacing: 1px; }
-        .version-tag { font-size: 14px; color: #047857; font-weight: bold; vertical-align: middle; background: #a7f3d0; padding: 4px 10px; border-radius: 8px; border: 1px solid #34d399; }
+        .version-tag { font-size: 14px; color: #1d4ed8; font-weight: bold; vertical-align: middle; background: #dbeafe; padding: 4px 10px; border-radius: 8px; border: 1px solid #93c5fd; }
         
         /* === 🔍 搜尋列 === */
         .find-panel { display: flex; gap: 10px; margin-bottom: 30px; justify-content: center; }
@@ -40,21 +40,23 @@
         .card-main-title { font-size: 26px; font-weight: 900; color: #0f172a; margin-top: 0; margin-bottom: 25px; padding-bottom: 12px; border-bottom: 3px solid #4f46e5; display: inline-block; }
         .card-top-flex { display: flex; flex-direction: row; gap: 35px; margin-bottom: 40px; }
         
-        /* 左側：照片 + 按鈕 */
+        /* 💡 左側：人物照片 + 版本按鈕 */
         .card-left { flex: 0 0 350px; display: flex; flex-direction: column; gap: 15px; }
         #dash-img-container { width: 100%; height: 450px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
         #dash-main-img { max-width: 100%; max-height: 100%; object-fit: contain; cursor: zoom-in; transition: opacity 0.3s ease; }
+        
+        /* 切換按鈕容器 */
         #dash-img-controls { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; }
         .img-btn { background: #ffffff; color: #475569; border: 1px solid #cbd5e1; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: bold; transition: 0.2s; }
         .img-btn:hover { background: #e2e8f0; }
         .img-btn.active { background: #4f46e5; color: white; border-color: #4f46e5; box-shadow: 0 4px 6px rgba(79,70,229,0.2); }
 
-        /* 右側：資料區 */
+        /* 💡 右側：角色信息逐列呈現 */
         .card-right { flex: 1; display: flex; flex-direction: column; gap: 0; overflow-y: auto; max-height: 550px; padding-right: 15px; }
         .card-right::-webkit-scrollbar { width: 6px; }
         .card-right::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         
-        .dash-group-title { font-size: 17px; font-weight: 900; color: #ffffff; margin: 15px 0 5px 0; background: #4f46e5; padding: 8px 15px; border-radius: 6px; letter-spacing: 1px; }
+        .dash-group-title { font-size: 17px; font-weight: 900; color: #ffffff; margin: 15px 0 5px 0; background: #4f46e5; padding: 8px 15px; border-radius: 6px; letter-spacing: 1px; display: inline-block; }
         .dash-row { display: flex; align-items: flex-start; padding: 12px 0; border-bottom: 1px dashed #e2e8f0; font-size: 15px; line-height: 1.6; }
         .dash-row:last-child { border-bottom: none; }
         .dash-lbl { flex: 0 0 130px; font-weight: 800; color: #64748b; padding-top: 2px; }
@@ -62,10 +64,7 @@
         .dash-val a { color: #3b82f6; text-decoration: none; font-weight: bold; }
         .dash-val a:hover { text-decoration: underline; }
 
-        .pill-container { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
-        .dash-pill { background: #e0e7ff; color: #3730a3; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; display: inline-block; border: 1px solid #c7d2fe; }
-
-        /* 下半部：詳細資料 */
+        /* 💡 下半部：人物詳細資料 */
         .card-bottom-section { border-top: 2px dashed #cbd5e1; padding-top: 30px; line-height: 1.8; font-size: 16px; color: #334155; }
         .bottom-title { font-size: 20px; font-weight: 800; color: #1e293b; margin-bottom: 20px; display: inline-block; border-left: 5px solid #4f46e5; padding-left: 10px; }
         
@@ -89,7 +88,7 @@
 </head>
 <body>
 
-    <h1>🗡️ FF14 角色資訊面板 <span class="version-tag">(v13333 破除幻象版)</span></h1>
+    <h1>🗡️ FF14 角色資訊面板 <span class="version-tag">(v14 排版校正版)</span></h1>
     
     <div class="find-panel">
         <input type="text" id="findInput" placeholder="請輸入關鍵字（例如：塔塔露...）" value="塔塔露">
@@ -139,6 +138,7 @@
                     const keyword = input.value.trim();
                     if (!keyword) return;
                     
+                    statusMsg.innerHTML = `<div class="loading">🟢 啟動四重突破協議，尋找最佳連線路徑...</div>`;
                     mainCard.style.display = 'none';
                     executeDashboardBuild(keyword);
                 } catch (err) {
@@ -146,91 +146,59 @@
                 }
             }
 
-            function fetchJsonp(url, timeout = 8000) {
+            function fetchJsonp(url) {
                 return new Promise((resolve, reject) => {
                     const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
-                    let script = document.createElement('script');
-                    
-                    const timer = setTimeout(() => {
-                        cleanup();
-                        reject(new Error('JSONP Timeout'));
-                    }, timeout);
-
-                    function cleanup() {
-                        if (script.parentNode) document.body.removeChild(script);
-                        delete window[callbackName];
-                        clearTimeout(timer);
-                    }
-
                     window[callbackName] = function(data) {
-                        cleanup();
+                        delete window[callbackName];
+                        document.body.removeChild(script);
                         resolve(data);
                     };
-
+                    const script = document.createElement('script');
                     script.src = url + '&callback=' + callbackName;
-                    script.onerror = () => { cleanup(); reject(new Error('JSONP Error')); };
+                    script.onerror = () => reject(new Error('JSONP 被阻擋'));
                     document.body.appendChild(script);
                 });
             }
 
-            // ⭐️ 核心防護魔法：不再被假錯誤騙了 ⭐️
-            async function superFetch(searchKeyword, statusMsg) {
+            async function superFetch(searchKeyword) {
                 const targetUrl = `https://ff14.huijiwiki.com/api.php?action=parse&format=json&page=${encodeURIComponent(searchKeyword)}&redirects=1&prop=text`;
-                
-                // 嚴格檢驗：只要不是「真正成功的資料」或「確定無此頁面」，一律當成是被防火牆擋下！
-                const isValid = (data) => {
-                    if (data && data.parse) return true;
-                    // missingtitle 才是真正的找不到頁面，其餘的 badorigin 等通通是防火牆的幻象
-                    if (data && data.error && data.error.code === 'missingtitle') return true;
-                    return false;
-                };
+                const isValid = (d) => d && (d.parse || (d.error && d.error.code === 'missingtitle'));
 
-                statusMsg.innerHTML = `<div class="loading">🚀 啟動通道 1 (原生腳本直連)...</div>`;
-                try {
-                    let data = await fetchJsonp(targetUrl);
-                    if (isValid(data)) return data;
-                } catch(e) {}
+                try { let data = await fetchJsonp(targetUrl); if (isValid(data)) return data; } catch(e) {}
+                try { let res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`); let data = await res.json(); if (isValid(data)) return data; } catch(e) {}
+                try { let res = await fetch(`https://corsproxy.io/?${encodeURIComponent(targetUrl)}`); let data = await res.json(); if (isValid(data)) return data; } catch(e) {}
+                try { let res = await fetch(targetUrl + '&origin=*'); let data = await res.json(); if (isValid(data)) return data; } catch(e) {}
 
-                statusMsg.innerHTML = `<div class="loading">🚀 通道 1 受阻，切換通道 2 (AllOrigins 代理)...</div>`;
-                try {
-                    let res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`);
-                    let data = await res.json();
-                    if (isValid(data)) return data;
-                } catch(e) {}
+                throw new Error("防火牆攔截了所有的請求，請稍後再試。");
+            }
 
-                statusMsg.innerHTML = `<div class="loading">🚀 通道 2 受阻，切換通道 3 (CorsProxy 代理)...</div>`;
-                try {
-                    let res = await fetch(`https://corsproxy.io/?${encodeURIComponent(targetUrl)}`);
-                    let data = await res.json();
-                    if (isValid(data)) return data;
-                } catch(e) {}
-
-                statusMsg.innerHTML = `<div class="loading">🚀 切換最後通道 (跨域強登)...</div>`;
-                try {
-                    let res = await fetch(targetUrl + '&origin=*');
-                    let data = await res.json();
-                    if (isValid(data)) return data;
-                } catch(e) {}
-
-                throw new Error("所有連線通道皆被防火牆無情攔截，請稍後再試。");
+            // 輔助函式：取得高清圖片網址
+            function getHighResUrl(img) {
+                let src = img.getAttribute('data-src') || img.getAttribute('data-lazy-src') || img.getAttribute('src');
+                if (!src || src.includes('16px') || src.includes('20px')) return null; 
+                if (src.startsWith('//')) src = 'https:' + src;
+                else if (src.startsWith('/')) src = 'https://ff14.huijiwiki.com' + src;
+                if (src.includes('/thumb/')) {
+                    src = src.replace('/thumb/', '/');
+                    src = src.substring(0, src.lastIndexOf('/'));
+                }
+                return src;
             }
 
             async function executeDashboardBuild(keyword) {
                 try {
                     let s2tConverter = (text) => text;
                     let t2sConverter = (text) => text;
-
                     if (window.OpenCC && typeof window.OpenCC.Converter === 'function') {
                         s2tConverter = window.OpenCC.Converter({ from: 'cn', to: 'tw' });
                         t2sConverter = window.OpenCC.Converter({ from: 'tw', to: 'cn' });
                     }
 
                     const searchKeyword = t2sConverter(keyword);
+                    statusMsg.innerHTML = `<div class="loading">🚀 正在閃避防火牆，嘗試提取資料...</div>`;
 
-                    // 執行具備防騙機制的多重連線
-                    let data = await superFetch(searchKeyword, statusMsg);
-
-                    // 只有真的回傳 missingtitle，才會顯示這行
+                    let data = await superFetch(searchKeyword);
                     if (data.error) {
                         statusMsg.innerHTML = `<div class="error">找不到關於「${keyword}」的資訊。</div>`;
                         return;
@@ -240,13 +208,11 @@
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(data.parse.text['*'], 'text/html');
 
-                    // 物理超渡超連結
+                    // 剝除超連結防跳轉
                     doc.querySelectorAll('a').forEach(a => {
                         const img = a.querySelector('img');
-                        if (img) {
-                            a.parentNode.insertBefore(img, a); 
-                            a.remove(); 
-                        } else {
+                        if (img) { a.parentNode.insertBefore(img, a); a.remove(); } 
+                        else {
                             let href = a.getAttribute('href');
                             if (href && href.startsWith('/')) a.setAttribute('href', 'https://ff14.huijiwiki.com' + href);
                             a.setAttribute('target', '_blank');
@@ -254,51 +220,61 @@
                     });
 
                     doc.querySelectorAll('.mw-editsection, .noprint, style, script').forEach(e => e.remove());
-
                     const infobox = doc.querySelector('.infobox, .portable-infobox, table[class*="infobox"]');
                     
                     if (infobox) {
-                        // 1. 抽取照片與按鈕
+                        // === 1. ⭐️ 全新精準萃取器：找出版本標籤並轉換為按鈕，然後從 DOM 刪除！ ===
                         characterImages = [];
                         const addedUrls = new Set(); 
 
-                        infobox.querySelectorAll('img').forEach(img => {
-                            let src = img.getAttribute('data-src') || img.getAttribute('data-lazy-src') || img.getAttribute('src');
-                            if (!src || src.includes('16px') || src.includes('20px')) return; 
-
-                            if (src.startsWith('//')) src = 'https:' + src;
-                            else if (src.startsWith('/')) src = 'https://ff14.huijiwiki.com' + src;
-                            if (src.includes('/thumb/')) {
-                                src = src.replace('/thumb/', '/');
-                                src = src.substring(0, src.lastIndexOf('/'));
-                            }
-
-                            if(addedUrls.has(src)) return;
-                            addedUrls.add(src);
-
-                            let label = "外觀預覽";
-                            let tabPane = img.closest('.tab-pane, .tabbertab, .pi-image-collection-tab-content');
-                            if (tabPane) {
-                                label = tabPane.getAttribute('title') || tabPane.getAttribute('data-title') || label;
-                                let ref = tabPane.getAttribute('data-ref');
-                                if (ref) {
-                                    let navLi = infobox.querySelector(`.pi-image-collection-tabs li[data-ref="${ref}"]`);
-                                    if (navLi) label = navLi.textContent.trim();
+                        // 策略 A: 針對 Fandom 專屬的圖片群組標籤
+                        infobox.querySelectorAll('.pi-image-collection').forEach(collection => {
+                            collection.querySelectorAll('.pi-image-collection-tabs li').forEach(tab => {
+                                let ref = tab.getAttribute('data-ref');
+                                let label = tab.textContent.trim();
+                                let img = collection.querySelector(`.pi-image-collection-tab-content[data-ref="${ref}"] img`);
+                                if(img) {
+                                    let src = getHighResUrl(img);
+                                    if(src && !addedUrls.has(src)) { addedUrls.add(src); characterImages.push({url: src, label}); }
                                 }
-                            } else if (img.getAttribute('alt') && img.getAttribute('alt').length < 15) {
-                                label = img.getAttribute('alt');
-                            }
-                            characterImages.push({ url: src, label: label });
+                            });
+                            collection.remove(); // 抽完資料後，將這個會產生黑點點的區塊直接銷毀！
                         });
+
+                        // 策略 B: 針對通用的頁籤結構 (tabber)
+                        infobox.querySelectorAll('.tabber, .huiji-tabs').forEach(tabber => {
+                            tabber.querySelectorAll('.tabbertab, .tab-pane').forEach(pane => {
+                                let label = pane.getAttribute('title') || pane.getAttribute('data-title') || '外觀預覽';
+                                let img = pane.querySelector('img');
+                                if(img) {
+                                    let src = getHighResUrl(img);
+                                    if(src && !addedUrls.has(src)) { addedUrls.add(src); characterImages.push({url: src, label}); }
+                                }
+                            });
+                            tabber.remove(); // 同樣抽完立刻銷毀！
+                        });
+
+                        // 策略 C: 撈取剩下的散落圖片
+                        infobox.querySelectorAll('img').forEach(img => {
+                            let src = getHighResUrl(img);
+                            if(src && !addedUrls.has(src)) {
+                                let label = img.getAttribute('alt') || '外觀預覽';
+                                addedUrls.add(src); characterImages.push({url: src, label: label.substring(0, 15)});
+                            }
+                            img.remove(); // 圖片抽完也刪除
+                        });
+
+                        // 刪除可能殘留的頁籤導航列，避免右側跑出文字清單
+                        infobox.querySelectorAll('ul.nav, ul.tabbernav, ul.pi-image-collection-tabs').forEach(e => e.remove());
 
                         if (characterImages.length === 0) characterImages.push({ url: 'https://via.placeholder.com/350x450?text=無圖片', label: '預設' });
 
-                        // 2. 逐列排版魔法
+                        // === 2. 逐列排版魔法 (此時的 infobox 已經非常乾淨，沒有服裝文字了) ===
                         let rightPanelHtml = '';
-                        const mainTabs = infobox.querySelectorAll('.huiji-tab-content > .tab-pane, .pi-theme-default > .tabber > .tabbertab');
-
                         function extractRows(container) {
                             let html = '';
+                            
+                            // Fandom 版型資料行
                             if (container.querySelector('.pi-data')) {
                                 container.querySelectorAll('.pi-header, .pi-data').forEach(node => {
                                     if (node.classList.contains('pi-header')) {
@@ -313,6 +289,7 @@
                                 return html;
                             }
 
+                            // 傳統表格資料行
                             const rows = container.querySelectorAll('tr');
                             if (rows.length > 0) {
                                 rows.forEach(tr => {
@@ -323,11 +300,8 @@
                                 });
                             }
 
-                            const lists = container.querySelectorAll('li');
-                            let hasListPills = false;
-                            let pillHtml = '<div class="pill-container">';
-                            
-                            lists.forEach(li => {
+                            // 處理殘留清單的冒號解體
+                            container.querySelectorAll('li').forEach(li => {
                                 let rawText = li.textContent.replace(/[\s\xA0\u200B]/g, '');
                                 if (rawText === '' && !li.querySelector('img')) return; 
 
@@ -342,28 +316,17 @@
                                     let val = parts.join(':');
                                     html += `<div class="dash-row"><div class="dash-lbl">${lbl}</div><div class="dash-val">${val}</div></div>`;
                                 } else {
-                                    hasListPills = true;
-                                    pillHtml += `<span class="dash-pill">${li.innerHTML}</span>`;
+                                    // 沒有冒號的一般文字
+                                    html += `<div class="dash-row"><div class="dash-val" style="font-weight:bold; color:#4f46e5;">• ${li.innerHTML}</div></div>`;
                                 }
                             });
-                            pillHtml += '</div>';
-                            if (hasListPills) html += pillHtml;
-
                             return html;
                         }
 
-                        if (mainTabs.length > 0) {
-                            mainTabs.forEach(tab => {
-                                let tabTitle = tab.getAttribute('title') || tab.getAttribute('data-title') || '資料';
-                                rightPanelHtml += `<div class="dash-group-title" style="background:#1e293b; color:white;">📌 ${tabTitle}</div>`;
-                                rightPanelHtml += extractRows(tab);
-                            });
-                        } else {
-                            rightPanelHtml += extractRows(infobox);
-                        }
-
+                        rightPanelHtml += extractRows(infobox);
                         document.getElementById('dash-right').innerHTML = s2tConverter(rightPanelHtml) || '<div class="dash-row">無詳細資料</div>';
                         
+                        // 產生左側切換按鈕
                         const controlsContainer = document.getElementById('dash-img-controls');
                         controlsContainer.innerHTML = '';
                         characterImages.forEach((imgObj, index) => {
@@ -378,7 +341,7 @@
                         infobox.remove(); 
                     }
 
-                    // 3. 處理下方文章
+                    // === 3. 處理下方文章 ===
                     doc.querySelectorAll('ul[class*="nav"], div[class*="nav"], .tabbernav').forEach(el => el.remove());
                     doc.querySelectorAll('.tab-pane, .tabbertab').forEach(el => {
                         el.style.display = 'block'; el.style.opacity = '1'; el.style.visibility = 'visible'; el.style.height = 'auto';
@@ -436,7 +399,7 @@
                 }
             };
 
-            // 全局燈箱
+            // 全局燈箱防禦機制
             document.addEventListener('click', function(e) {
                 if (e.target.tagName === 'IMG' && e.target.id !== 'lightbox-img') {
                     e.preventDefault(); 
