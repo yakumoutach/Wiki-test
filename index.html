@@ -170,8 +170,6 @@
             const bpContainer = document.getElementById('blueprint-container');
             let characterImages = [];
 
-            if(input.value) triggerSearch();
-
             btn.addEventListener('click', triggerSearch);
             input.addEventListener('keypress', (e) => { if (e.key === 'Enter') triggerSearch(); });
 
