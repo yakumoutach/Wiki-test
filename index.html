@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="referrer" content="no-referrer">
-    <title>FF14 角色專屬資訊卡 - 藍圖版</title>
+    <title>FF14 角色專屬資訊卡 - 藍圖版 V2.1</title>
     <style>
         /* === 🌐 基礎設定 === */
         body { font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif; background-color: #f1f5f9; color: #1e293b; max-width: 1100px; margin: 30px auto; padding: 20px; }
@@ -30,7 +30,6 @@
             box-shadow: 10px 10px 0px #cbd5e1;
         }
 
-        /* 總標題：人物詳細資料 */
         .main-title {
             position: absolute;
             top: -18px;
@@ -43,14 +42,12 @@
             border: 2px solid #0f172a;
         }
 
-        /* 上半部左右布局 */
         .bp-main-content {
             display: flex;
             gap: 25px;
             margin-bottom: 25px;
         }
 
-        /* 左側：照片與版本 */
         .bp-left-layout {
             flex: 0 0 380px;
             display: flex;
@@ -58,7 +55,6 @@
             gap: 20px;
         }
 
-        /* 人物照片框 */
         .bp-box {
             border: 2px solid #0f172a;
             position: relative;
@@ -79,14 +75,12 @@
         #photo-box { height: 480px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
         #photo-box img { max-width: 100%; max-height: 100%; object-fit: contain; transition: opacity 0.3s; cursor: zoom-in; }
 
-        /* 版本按鈕區 */
         #version-box { min-height: 80px; }
         .btn-grid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-start; }
         .bp-btn { background: #f8fafc; border: 1px solid #0f172a; padding: 6px 12px; cursor: pointer; font-size: 13px; font-weight: 600; }
         .bp-btn:hover { background: #e2e8f0; }
         .bp-btn.active { background: #0f172a; color: white; }
 
-        /* 右側：信息呈現 */
         .bp-right-layout {
             flex: 1;
             border: 2px solid #0f172a;
@@ -96,7 +90,6 @@
             overflow-y: auto;
         }
 
-        /* 信息欄位樣式 */
         .info-group { background: #0f172a; color: white; padding: 5px 12px; font-weight: bold; margin-top: 15px; margin-bottom: 10px; }
         .info-group:first-child { margin-top: 0; }
         .info-row { display: flex; border-bottom: 1px solid #e2e8f0; padding: 8px 0; font-size: 15px; }
@@ -104,7 +97,6 @@
         .info-val { flex: 1; color: #1e293b; line-height: 1.5; }
         .pill { display: inline-block; background: #f1f5f9; border: 1px solid #cbd5e1; padding: 2px 10px; border-radius: 4px; font-size: 12px; margin: 2px; }
 
-        /* 下半部：簡介資料排版 */
         .bp-bottom-layout {
             border: 2px solid #0f172a;
             position: relative;
@@ -116,7 +108,6 @@
         #wiki-content th { background: #f8fafc; }
         .read-more { display: block; text-align: center; margin-top: 20px; padding: 15px; border: 2px dashed #cbd5e1; text-decoration: none; color: #4f46e5; font-weight: bold; }
 
-        /* 燈箱 */
         #lightbox { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; align-items: center; justify-content: center; cursor: pointer; }
         #lightbox img { max-width: 90%; max-height: 90%; border: 4px solid white; }
 
@@ -137,12 +128,10 @@
 
     <div id="status-msg"></div>
 
-    <!-- 依照架構圖設計的容器 -->
     <div id="blueprint-container">
         <div class="main-title">人物詳細資料</div>
 
         <div class="bp-main-content">
-            <!-- 左側列 -->
             <div class="bp-left-layout">
                 <div class="bp-box" id="photo-box">
                     <div class="bp-box-label">人物照片</div>
@@ -155,14 +144,12 @@
                 </div>
             </div>
 
-            <!-- 右側列 -->
             <div class="bp-right-layout" id="info-panel">
                 <div class="bp-box-label">角色信息, 相關信息 逐列呈現出來</div>
                 <div id="info-content"></div>
             </div>
         </div>
 
-        <!-- 底部區塊 -->
         <div class="bp-bottom-layout">
             <div class="bp-box-label">簡介以後的資料排版</div>
             <div id="wiki-content"></div>
@@ -183,7 +170,6 @@
             const bpContainer = document.getElementById('blueprint-container');
             let characterImages = [];
 
-            // 初始搜尋
             if(input.value) triggerSearch();
 
             btn.addEventListener('click', triggerSearch);
@@ -192,9 +178,52 @@
             function triggerSearch() {
                 const keyword = input.value.trim();
                 if (!keyword) return;
-                statusMsg.innerHTML = `<div class="sys-msg">📡 正在從灰機 Wiki 讀取角色數據...</div>`;
+                statusMsg.innerHTML = `<div class="sys-msg">📡 正在啟動多重路徑抓取角色數據...</div>`;
                 bpContainer.style.display = 'none';
                 fetchWikiData(keyword);
+            }
+
+            // 備用方案 1: JSONP 抓取 (繞過 CORS)
+            function fetchJsonp(url) {
+                return new Promise((resolve, reject) => {
+                    const callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
+                    window[callbackName] = function(data) { delete window[callbackName]; document.body.removeChild(script); resolve(data); };
+                    const script = document.createElement('script');
+                    script.src = url + '&callback=' + callbackName;
+                    script.onerror = () => reject(new Error('JSONP blocked'));
+                    document.body.appendChild(script);
+                });
+            }
+
+            // 強大的 SuperFetch 機制
+            async function superFetch(targetUrl) {
+                const isValid = (d) => d && (d.parse || (d.error && d.error.code === 'missingtitle'));
+                
+                // 嘗試 1: JSONP (最推薦，通常不會被 CORS 攔)
+                try { let data = await fetchJsonp(targetUrl); if (isValid(data)) return data; } catch(e) {}
+                
+                // 嘗試 2: AllOrigins 代理
+                try { 
+                    let res = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`); 
+                    let data = await res.json(); 
+                    if (isValid(data)) return data; 
+                } catch(e) {}
+                
+                // 嘗試 3: CorsProxy.io 代理
+                try { 
+                    let res = await fetch(`https://corsproxy.io/?${encodeURIComponent(targetUrl)}`); 
+                    let data = await res.json(); 
+                    if (isValid(data)) return data; 
+                } catch(e) {}
+                
+                // 嘗試 4: 原生 Fetch (最後掙扎)
+                try { 
+                    let res = await fetch(targetUrl + '&origin=*'); 
+                    let data = await res.json(); 
+                    if (isValid(data)) return data; 
+                } catch(e) {}
+
+                throw new Error("所有抓取路徑均失敗，可能是網路連線問題。");
             }
 
             async function fetchWikiData(keyword) {
@@ -207,13 +236,12 @@
                     }
 
                     const searchKeyword = t2s(keyword);
-                    const url = `https://ff14.huijiwiki.com/api.php?action=parse&format=json&page=${encodeURIComponent(searchKeyword)}&redirects=1&prop=text&origin=*`;
+                    const targetUrl = `https://ff14.huijiwiki.com/api.php?action=parse&format=json&page=${encodeURIComponent(searchKeyword)}&redirects=1&prop=text`;
                     
-                    const res = await fetch(url);
-                    const data = await res.json();
+                    const data = await superFetch(targetUrl);
 
                     if (data.error) {
-                        statusMsg.innerHTML = `<div class="sys-msg" style="color:red;">❌ 找不到角色「${keyword}」，請確認名稱是否正確。</div>`;
+                        statusMsg.innerHTML = `<div class="sys-msg" style="color:red;">❌ 找不到角色「${keyword}」。</div>`;
                         return;
                     }
 
@@ -221,14 +249,10 @@
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(htmlContent, 'text/html');
 
-                    // 1. 清理不必要的元素
                     doc.querySelectorAll('.mw-editsection, .noprint, style, script, .toc, .navbox').forEach(el => el.remove());
 
-                    // 2. 提取圖片 (收割機邏輯)
                     characterImages = [];
                     let addedUrls = new Set();
-                    
-                    // 尋找可能的分頁標籤名稱
                     let potentialLabels = [];
                     doc.querySelectorAll('ul li').forEach(li => {
                         let text = li.textContent.trim();
@@ -241,7 +265,6 @@
                         if (src.startsWith('//')) src = 'https:' + src;
                         else if (src.startsWith('/')) src = 'https://ff14.huijiwiki.com' + src;
                         
-                        // 轉換為原圖
                         if (src.includes('/thumb/')) {
                             src = src.replace('/thumb/', '/').substring(0, src.replace('/thumb/', '/').lastIndexOf('/'));
                         }
@@ -251,10 +274,9 @@
                             let label = img.getAttribute('alt') || potentialLabels.shift() || "外觀預覽";
                             characterImages.push({ url: src, label: label });
                         }
-                        img.remove(); // 從正文中移除，統一放左側
+                        img.remove();
                     });
 
-                    // 3. 解析 Infobox (右側資料)
                     let infoHtml = '';
                     const infobox = doc.querySelector('.infobox, .portable-infobox, .huiji-infobox, table.wikitable');
                     if (infobox) {
@@ -270,14 +292,11 @@
                         infobox.remove();
                     }
 
-                    // 4. 渲染界面
                     statusMsg.innerHTML = '';
                     bpContainer.style.display = 'block';
 
-                    // 右側信息
                     document.getElementById('info-content').innerHTML = s2t(infoHtml || "暫無詳細表格資料");
 
-                    // 左側圖片與按鈕
                     const controls = document.getElementById('img-controls');
                     controls.innerHTML = '';
                     if (characterImages.length === 0) characterImages.push({url: 'https://via.placeholder.com/400x600?text=No+Image', label: '預設'});
@@ -291,10 +310,7 @@
                     });
                     switchImage(0, controls.firstChild);
 
-                    // 下方正文
                     const wikiOutput = doc.querySelector('.mw-parser-output') || doc.body;
-                    
-                    // 翻譯正文
                     function walk(node) {
                         if (node.nodeType === 3) node.nodeValue = s2t(node.nodeValue);
                         node.childNodes.forEach(walk);
@@ -306,7 +322,7 @@
                         `<a href="${wikiLink}" target="_blank" class="read-more">🔗 點此前往 Wiki 查閱更多細節</a>`;
 
                 } catch (err) {
-                    statusMsg.innerHTML = `<div class="sys-msg" style="color:red;">發生意外錯誤：${err.message}</div>`;
+                    statusMsg.innerHTML = `<div class="sys-msg" style="color:red;">發生意外錯誤：${err.message} <br><small>請嘗試更換網路環境或稍後再試。</small></div>`;
                 }
             }
 
@@ -322,7 +338,6 @@
                 if(btn) btn.classList.add('active');
             }
 
-            // 燈箱功能
             document.addEventListener('click', (e) => {
                 if (e.target.tagName === 'IMG' && (e.target.id === 'main-img' || e.target.closest('#wiki-content'))) {
                     document.getElementById('lightbox-img').src = e.target.src;
